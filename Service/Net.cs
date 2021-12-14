@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using UnityEngine.Networking;
 
 namespace SDK.PC{
     [DisallowMultipleComponent]
@@ -11,7 +12,7 @@ namespace SDK.PC{
         private static GameObject netObject;
 
         public static void GetRequest(string url,
-            Dictionary<string, string> parameters,
+            Dictionary<string, object> parameters,
             Action<string> methodForResult,
             Action<int, string> methodForError){
             if (string.IsNullOrEmpty(url)){
@@ -77,7 +78,6 @@ namespace SDK.PC{
             Action<string> methodForResult, Action<int, string> methodForError){
             Dictionary<string, object> finalParameter = parameters ?? new Dictionary<string, object>();
 
-            finalParameter.Add("uniqueId", DataStorage.GetUniqueID());
 #if UNITY_STANDALONE_OSX
             finalParameter.Add("system", "OSX");
 #endif
@@ -86,26 +86,22 @@ namespace SDK.PC{
             finalParameter.Add("system", "Windows");
 #endif
             String jsonString = MiniJSON.Json.Serialize(finalParameter);
-
-            Dictionary<string, string> postHeader = new Dictionary<string, string>{
-                {"Content-Type", "application/json"}
-            };
-
+            UnityWebRequest w = UnityWebRequest.Post(url, jsonString);
+            w.SetRequestHeader("Content-Type", "application/json");
+            w.timeout = 10;
 
             if (headers != null){
                 Dictionary<string, string>.KeyCollection keys = headers.Keys;
                 foreach (string headerKey in keys){
-                    postHeader.Add(headerKey, headers[headerKey]);
+                    w.SetRequestHeader(headerKey, headers[headerKey]);
                 }
             }
             
-            Byte[] formData = System.Text.Encoding.UTF8.GetBytes(jsonString);
-            WWW w = new WWW(url, formData, postHeader);
-            yield return w;
+            yield return w.SendWebRequest();
 
-            if (!string.IsNullOrEmpty(w.error)){
+            if (!string.IsNullOrEmpty(w.error) || w.isHttpError || w.isNetworkError){
                 XDGSDK.LogError(w.error);
-                string data = w.text;
+                string data = w.downloadHandler.text;
                 if (data != null){
                     methodForError(GetResponseCode(w), data);
                 }
@@ -117,10 +113,11 @@ namespace SDK.PC{
                 yield break;
             }
             else{
-                string data = w.text;
+                string data = w.downloadHandler.text;
                 if (data != null){
-                    XDGSDK.Log("发起Post请求：" + url + "\n\n参数：" + jsonString + "\n\n响应结果：" + w.text);
-                    methodForResult(w.text);
+                    string heads = DictToQueryString2(w.GetResponseHeaders());
+                    XDGSDK.Log("发起Post请求：" + url + "\n\n请求头：" + heads + "\n\n参数：" + jsonString + "\n\n响应结果：" + data);
+                    methodForResult(data);
                     yield break;
                 }
                 else{
@@ -130,13 +127,13 @@ namespace SDK.PC{
             }
         }
 
-        private IEnumerator Get(string url, Dictionary<string, string> parameters,
+        private IEnumerator Get(string url, Dictionary<string, object> parameters,
             Action<string> methodForResult,
             Action<int, string> methodForError){
             string finalUrl = "";
             string system = "";
 
-            Dictionary<string, string> finalParameter = parameters ?? new Dictionary<string, string>();
+            Dictionary<string, object> finalParameter = parameters ?? new Dictionary<string, object>();
 
 #if UNITY_STANDALONE_OSX
             system = "OSX";
@@ -146,7 +143,6 @@ namespace SDK.PC{
             system = "Windows";
 #endif
             finalParameter.Add("system", system);
-            finalParameter.Add("uniqueId", DataStorage.GetUniqueID());
             NameValueCollection collection = new NameValueCollection();
             string baseUrl;
 
@@ -157,22 +153,26 @@ namespace SDK.PC{
                     finalParameter.Add(key, value);
                 }
             }
-
             finalUrl = baseUrl + "?" + DictToQueryString(finalParameter);
-            WWW w = new WWW(finalUrl);
-            yield return w;
+            
+            UnityWebRequest w = UnityWebRequest.Get(finalUrl);
+            w.SetRequestHeader("Content-Type", "application/json");
+            w.timeout = 10;
+            
+            yield return w.SendWebRequest();
 
-            if (!string.IsNullOrEmpty(w.error)){
+            if (!string.IsNullOrEmpty(w.error) || w.isHttpError || w.isNetworkError){
                 XDGSDK.LogError(w.error);
                 methodForError(GetResponseCode(w), w.error);
                 w.Dispose();
                 yield break;
             }
             else{
-                string data = w.text;
+                string data = w.downloadHandler.text;
                 if (data != null){
-                    XDGSDK.Log("发起Get请求：" + finalUrl + "\n\n响应结果：" + w.text);
-                    methodForResult(w.text);
+                    string heads = DictToQueryString2(w.GetResponseHeaders());
+                    XDGSDK.Log("发起Get请求：" + finalUrl + "\n\n请求头：" + heads + "\n\n响应结果：" + data);
+                    methodForResult(data);
                     yield break;
                 }
                 else{
@@ -182,17 +182,17 @@ namespace SDK.PC{
             }
         }
 
-        private static int GetResponseCode(WWW request){
+        private static int GetResponseCode(UnityWebRequest request){
             int ret = 0;
-            if (request.responseHeaders == null){
+            if (request.GetResponseHeaders() == null){
                 XDGSDK.LogError("no response headers.");
             }
             else{
-                if (!request.responseHeaders.ContainsKey("STATUS")){
+                if (!request.GetResponseHeaders().ContainsKey("STATUS")){
                     XDGSDK.LogError("response headers has no STATUS.");
                 }
                 else{
-                    ret = ParseResponseCode(request.responseHeaders["STATUS"]);
+                    ret = ParseResponseCode(request.GetResponseHeaders()["STATUS"]);
                 }
             }
 
@@ -215,12 +215,19 @@ namespace SDK.PC{
             return ret;
         }
 
-        private static string DictToQueryString(IDictionary<string, string> dict){
+        private static string DictToQueryString(IDictionary<string, object> dict){
             List<string> list = new List<string>();
             foreach (var item in dict){
                 list.Add(item.Key + "=" + item.Value);
             }
-
+            return string.Join("&", list.ToArray());
+        }
+        
+        private static string DictToQueryString2(IDictionary<string, string> dict){
+            List<string> list = new List<string>();
+            foreach (var item in dict){
+                list.Add(item.Key + "=" + item.Value);
+            }
             return string.Join("&", list.ToArray());
         }
 

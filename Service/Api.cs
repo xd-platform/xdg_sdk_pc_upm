@@ -9,7 +9,7 @@ namespace SDK.PC{
         private readonly static string INIT_SDK = BASE_URL_V2 + "/sdk/appid_info";
 
         public static void InitSDK(string appId, Action<bool> callback){
-            Dictionary<string, string> param = new Dictionary<string, string>{
+            Dictionary<string, object> param = new Dictionary<string, object>{
                 {"client_id", appId}
             };
 
@@ -20,8 +20,5 @@ namespace SDK.PC{
                 callback(false);
             });
         }
-        
-        
-        
     }
 }

@@ -6,11 +6,7 @@ using System.Collections.Generic;
 namespace SDK.PC{
     [DisallowMultipleComponent]
     public class UIManager : MonoBehaviour{
-        public static readonly int RESULT_FAILED = -1;
-        public static readonly int RESULT_SUCCESS = 0;
-        public static readonly int RESULT_BACK = 1;
-        public static readonly int RESULT_CLOSE = 2;
-
+        
         private static GameObject managerObject;
         private GameObject containerObj;
         private readonly List<UIElement> uiElements = new List<UIElement>();
