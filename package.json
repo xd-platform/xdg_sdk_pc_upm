@@ -1,0 +1,12 @@
+{
+  "name": "com.xd.pc",
+  "version": "6.0.0-beta",
+  "description": "XD-Pc",
+  "license": "MIT",
+  "author": "guiming <suguiming@xd.com>",
+  "dependencies": {
+    "com.taptap.tds.common": "https://github.com/TapTap/TapCommon-Unity.git#3.5.0",
+    "com.taptap.tds.login": "https://github.com/taptap/TapLogin-Unity.git#3.5.0",
+    "com.unity.nuget.newtonsoft-json": "2.0.2"
+  }
+}
