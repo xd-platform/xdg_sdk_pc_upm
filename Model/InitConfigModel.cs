@@ -38,23 +38,29 @@ namespace SDK.PC{
             public int canUnbind{ get; set; }
         }
 
+        private static InitConfigModel currentMd = null;
         public static void SaveToLocal(InitConfigModel model){
             if (model != null){
                 string json = XDGSDK.GetJson(model);
                 DataStorage.SaveString(DataStorage.InitConfig, json);
+                currentMd = model;
             }
         }
         
         public static InitConfigModel GetLocalModel(){
-            string json = DataStorage.LoadString(DataStorage.InitConfig);
-            if (!string.IsNullOrEmpty(json)){
-                return XDGSDK.GetModel<InitConfigModel>(json);
-            } else{
-                return null;
+            if (currentMd == null){
+                string json = DataStorage.LoadString(DataStorage.InitConfig);
+                if (!string.IsNullOrEmpty(json)){
+                    currentMd = XDGSDK.GetModel<InitConfigModel>(json);
+                } else{
+                    XDGSDK.Log("Init Config Model 为空");
+                }
             }
+            return currentMd;
         }
 
         public static void ClearLocalModel(){
+            currentMd = null;
             DataStorage.SaveString(DataStorage.InitConfig, "");
         }
 

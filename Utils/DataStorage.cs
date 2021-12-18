@@ -10,7 +10,8 @@ using System.IO;
 namespace SDK.PC{
     public static class DataStorage{
 
-        public static readonly string InitConfig = "InitConfigKey";
+        public static readonly string InitConfig = "XD_InitConfigKey";
+        public static readonly string IpInfo = "XD_IpInfoKey";
         
         
         private static Dictionary<string, string> dataCache;
