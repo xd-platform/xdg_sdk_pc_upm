@@ -37,6 +37,10 @@ namespace SDK.PC{
             // Debug.Log($"TapTap 登录成功 profile: {profile.ToJson()}");
         }
 
+        public static void SetLanguage(LanguageType type){
+            LanguageMg.SetLanguageType(type);
+        }
+
         public static void Log(string msg){
             Debug.Log("-------------SDK 打印-------------\n" + msg + "\n\n");
         }

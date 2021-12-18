@@ -44,6 +44,18 @@ namespace SDK.PC{
             Instance().PushUIElement<T>(typeof(T).Name, configs, callback);
         }
 
+        public static void ShowToast(string msg){
+            
+        }
+
+        public static void ShowLoading(){
+            
+        }
+
+        public static void DismissLoading(){
+            
+        }
+
         private static UIManager Instance(){
             if (managerObject == null){
                 managerObject = new GameObject{
