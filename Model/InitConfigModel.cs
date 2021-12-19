@@ -52,9 +52,7 @@ namespace SDK.PC{
                 string json = DataStorage.LoadString(DataStorage.InitConfig);
                 if (!string.IsNullOrEmpty(json)){
                     currentMd = XDGSDK.GetModel<InitConfigModel>(json);
-                } else{
-                    XDGSDK.Log("Init Config Model 为空");
-                }
+                } 
             }
             return currentMd;
         }

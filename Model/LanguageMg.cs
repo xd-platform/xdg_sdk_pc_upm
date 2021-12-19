@@ -43,7 +43,7 @@ namespace SDK.PC{
             currentModel = XDGSDK.GetModel<LanguageModel>(modelJson);
         }
 
-        private static string GetLanguageKey(){
+        public static string GetLanguageKey(){
             if (anguageType == LanguageType.CN){
                 return @"zh_CN";
             } else if (anguageType == LanguageType.TW){

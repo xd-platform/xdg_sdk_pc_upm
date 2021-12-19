@@ -12,7 +12,8 @@ namespace SDK.PC{
 
         public static readonly string InitConfig = "XD_InitConfigKey";
         public static readonly string IpInfo = "XD_IpInfoKey";
-        
+        public static readonly string TokenInfo = "XD_TokenInfo";
+        public static readonly string UserInfo = "XD_UserInfo";
         
         private static Dictionary<string, string> dataCache;
         private static byte[] Keys ={0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF};
@@ -130,19 +131,6 @@ namespace SDK.PC{
 
             return physicalAddress;
 #endif
-        }
-
-        public static string GetUniqueID(){
-            string uuid = DataStorage.LoadString("sdk_unique_id");
-            if (!string.IsNullOrEmpty(uuid)){
-                return uuid;
-            }
-            else{
-                uuid = System.Guid.NewGuid().ToString();
-                DataStorage.SaveString("sdk_unique_id", uuid);
-            }
-
-            return uuid;
         }
     }
 }

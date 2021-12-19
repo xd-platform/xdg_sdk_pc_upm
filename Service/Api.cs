@@ -26,6 +26,8 @@ namespace SDK.PC{
 
         // 三方解绑接口
         private readonly static string XDG_UNBIND_INTERFACE = BASE_URL + @"/api/account/v1/unbind";
+        
+        private readonly static string TDSG_GLOBAL_SDK_DOMAIN = @"https://xdg-1c20f-intl.xd.com";
 
 
         public static void InitSDK(string clientId, string countryCode, string sdkLang,
@@ -70,5 +72,6 @@ namespace SDK.PC{
                 }
             });
         }
+
     }
 }

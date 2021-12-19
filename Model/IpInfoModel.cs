@@ -23,16 +23,9 @@ namespace SDK.PC{
                 string json = DataStorage.LoadString(DataStorage.IpInfo);
                 if (!string.IsNullOrEmpty(json)){
                     currentMd = XDGSDK.GetModel<IpInfoModel>(json);
-                } else{
-                    XDGSDK.Log("Ip Info Model 为空");
                 }
             }
             return currentMd;
-        }
-
-        public static void ClearLocalModel(){
-            currentMd = null;
-            DataStorage.SaveString(DataStorage.IpInfo, "");
         }
     }
 }

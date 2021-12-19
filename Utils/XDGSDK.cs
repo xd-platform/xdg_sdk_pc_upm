@@ -6,7 +6,8 @@ using Newtonsoft.Json;
 
 namespace SDK.PC{
     public class XDGSDK{
-        private readonly static string VERSION = "6.0.0"; //SDK 版本号
+        private readonly static string VERSION = "6.0.0"; 
+        private readonly static string VERSION_CODE = "6000"; 
 
         public static void InitSDK(string clientId, string countryCode, string sdkLang,
             Action<bool, InitConfigModel.Data> callback){
@@ -15,6 +16,10 @@ namespace SDK.PC{
 
         public static string GetSdkVersion(){
             return VERSION;
+        }
+        
+        public static string GetSdkVersionCode(){
+            return VERSION_CODE;
         }
 
         public async static void Login(){
