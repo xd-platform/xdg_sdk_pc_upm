@@ -9,9 +9,14 @@ namespace SDK.PC{
         private readonly static string VERSION = "6.0.0"; 
         private readonly static string VERSION_CODE = "6000"; 
 
-        public static void InitSDK(string clientId, string countryCode, string sdkLang,
-            Action<bool, InitConfigModel.Data> callback){
-            Api.InitSDK(clientId, countryCode, sdkLang, callback);
+        public static void InitSDK(string sdkClientId, string tapClientId, Action<bool, InitConfigModel.Data> callback){
+            Api.GetIpInfo((success, model) => {
+                if (success){
+                    Api.InitSDK(sdkClientId, tapClientId, callback);       
+                } else{
+                    callback(false, null);
+                }
+            });
         }
 
         public static string GetSdkVersion(){

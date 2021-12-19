@@ -23,9 +23,7 @@ namespace SDK.PC{
                 string json = DataStorage.LoadString(DataStorage.TokenInfo);
                 if (!string.IsNullOrEmpty(json)){
                     currentMd = XDGSDK.GetModel<TokenModel>(json);
-                } else{
-                    XDGSDK.Log("Token Model 为空");
-                }
+                } 
             }
             return currentMd;
         }

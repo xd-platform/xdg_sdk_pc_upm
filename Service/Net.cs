@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
-using System.Collections.Specialized;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEditor;
@@ -81,23 +78,19 @@ namespace SDK.PC{
 
         private IEnumerator Post(string url, Dictionary<string, string> headers, Dictionary<string, object> parameters,
             Action<string> methodForResult, Action<int, string> methodForError){
+            
+            string finalUrl  = url + "?" + DictToQueryString2(GetCommonParam(url));
             Dictionary<string, object> finalParameter = parameters ?? new Dictionary<string, object>();
-
-#if UNITY_STANDALONE_OSX
-            finalParameter.Add("system", "OSX");
-#endif
-
-#if UNITY_STANDALONE_WIN
-            finalParameter.Add("system", "Windows");
-#endif
+            
             String jsonString = MiniJSON.Json.Serialize(finalParameter);
-            UnityWebRequest w = UnityWebRequest.Post(url, jsonString);
+            UnityWebRequest w = UnityWebRequest.Post(finalUrl, jsonString);
             w.SetRequestHeader("Content-Type", "application/json");
             w.timeout = 15;
 
-            var auth = GetMacToken(url, "POST");
+            var auth = GetMacToken(finalUrl, "POST");
             if (!string.IsNullOrEmpty(auth)){
                 w.SetRequestHeader("Authorization", auth);
+                XDGSDK.Log("Authorization:" + auth);
             }
 
             if (headers != null){
@@ -106,11 +99,14 @@ namespace SDK.PC{
                     w.SetRequestHeader(headerKey, headers[headerKey]);
                 }
             }
-
+            
             yield return w.SendWebRequest();
 
-            if (!string.IsNullOrEmpty(w.error) || w.isHttpError || w.isNetworkError){
-                XDGSDK.LogError(w.error);
+            if (!string.IsNullOrEmpty(w.error)){
+                if (w.downloadHandler != null){
+                    XDGSDK.LogError(finalUrl + "\n\n" + w.downloadHandler.text);
+                }
+                
                 string data = w.downloadHandler.text;
                 if (data != null){
                     methodForError(GetResponseCode(w), data);
@@ -124,12 +120,12 @@ namespace SDK.PC{
                 string data = w.downloadHandler.text;
                 if (data != null){
                     string heads = DictToQueryString2(w.GetResponseHeaders());
-                    XDGSDK.Log("发起Post请求：" + url + "\n\n请求头：" + heads + "\n\n参数：" + jsonString + "\n\n响应结果：" + data);
+                    XDGSDK.Log("发起Post请求：" + finalUrl + "\n\n请求头：" + heads + "\n\n参数：" + jsonString + "\n\n响应结果：" + data);
                     methodForResult(data);
                     yield break;
                 } else{
-                    XDGSDK.Log("请求失败，response 为空。url: " + url);
-                    methodForError(GetResponseCode(w), "Empyt response from server : " + url);
+                    XDGSDK.Log("请求失败，response 为空。url: " + finalUrl);
+                    methodForError(GetResponseCode(w), "Empyt response from server : " + finalUrl);
                 }
             }
         }
@@ -137,45 +133,24 @@ namespace SDK.PC{
         private IEnumerator Get(string url, Dictionary<string, object> parameters,
             Action<string> methodForResult,
             Action<int, string> methodForError){
-            string finalUrl = "";
-            string system = "";
 
-            Dictionary<string, object> finalParameter = parameters ?? new Dictionary<string, object>();
-
-#if UNITY_STANDALONE_OSX
-            system = "OSX";
-#endif
-
-#if UNITY_STANDALONE_WIN
-            system = "Windows";
-#endif
-            finalParameter.Add("system", system);
-            NameValueCollection collection = new NameValueCollection();
-            string baseUrl;
-
-            ParseUrl(url, out baseUrl, out collection);
-
-            foreach (string key in collection.AllKeys){
-                foreach (string value in collection.GetValues(key)){
-                    finalParameter.Add(key, value);
-                }
-            }
-
-            finalUrl = baseUrl + "?" + DictToQueryString(finalParameter);
-
+            string finalUrl = url + "?" + DictToQueryString(parameters) + DictToQueryString2(GetCommonParam(url));
+            
             UnityWebRequest w = UnityWebRequest.Get(finalUrl);
             w.SetRequestHeader("Content-Type", "application/json");
             w.timeout = 15;
 
-            var auth = GetMacToken(url, "GET");
+            var auth = GetMacToken(finalUrl, "GET");
             if (!string.IsNullOrEmpty(auth)){
                 w.SetRequestHeader("Authorization", auth);
             }
 
             yield return w.SendWebRequest();
 
-            if (!string.IsNullOrEmpty(w.error) || w.isHttpError || w.isNetworkError){
-                XDGSDK.LogError(w.error);
+            if (!string.IsNullOrEmpty(w.error)){
+                if (w.downloadHandler != null){
+                    XDGSDK.LogError(finalUrl + "\n\n" +  w.downloadHandler.text);
+                }
                 methodForError(GetResponseCode(w), w.error);
                 w.Dispose();
                 yield break;
@@ -187,8 +162,8 @@ namespace SDK.PC{
                     methodForResult(data);
                     yield break;
                 } else{
-                    XDGSDK.Log("请求失败，response 为空。url: " + url);
-                    methodForError(GetResponseCode(w), "Empty response from server : " + url);
+                    XDGSDK.Log("请求失败，response 为空。url: " + finalUrl);
+                    methodForError(GetResponseCode(w), "Empty response from server : " + finalUrl);
                 }
             }
         }
@@ -224,45 +199,25 @@ namespace SDK.PC{
         }
 
         private static string DictToQueryString(IDictionary<string, object> dict){
+            if (dict == null){
+                return "";
+            }
             List<string> list = new List<string>();
             foreach (var item in dict){
                 list.Add(item.Key + "=" + item.Value);
             }
-
             return string.Join("&", list.ToArray());
         }
 
         private static string DictToQueryString2(IDictionary<string, string> dict){
+            if (dict == null){
+                return "";
+            }
             List<string> list = new List<string>();
             foreach (var item in dict){
                 list.Add(item.Key + "=" + item.Value);
             }
-
             return string.Join("&", list.ToArray());
-        }
-
-        private static void ParseUrl(string url, out string baseUrl, out NameValueCollection nvc){
-            if (url == null)
-                throw new ArgumentNullException("url");
-            nvc = new NameValueCollection();
-            baseUrl = "";
-            if (url == "")
-                return;
-            int questionMarkIndex = url.IndexOf('?');
-            if (questionMarkIndex == -1){
-                baseUrl = url;
-                return;
-            }
-
-            baseUrl = url.Substring(0, questionMarkIndex);
-            if (questionMarkIndex == url.Length - 1)
-                return;
-            string ps = url.Substring(questionMarkIndex + 1);
-            Regex re = new Regex(@"(^|&)?(\w+)=([^&]+)(&|$)?", RegexOptions.None);
-            MatchCollection mc = re.Matches(ps);
-            foreach (Match m in mc){
-                nvc.Add(m.Result("$2").ToLower(), m.Result("$3"));
-            }
         }
 
         private static string GetMacToken(string url, string method){
@@ -295,8 +250,12 @@ namespace SDK.PC{
             return calcHashString;
         }
 
-        private static Dictionary<string, string> GetCommonParam(){
-            var paramMd = ParamConfigModel.Instance();
+        private static Dictionary<string, string> GetCommonParam(string url){
+            if (url.Contains("ip.xindong.com")){
+                return null;
+            }
+
+            var clientId = DataStorage.LoadString(DataStorage.ClientId);
             var cfgMd = InitConfigModel.GetLocalModel();
             var ipMd = IpInfoModel.GetLocalModel();
             if (ipMd == null){
@@ -304,7 +263,7 @@ namespace SDK.PC{
             }
 
             Dictionary<string, string> param = new Dictionary<string, string>{
-                {"clientId", paramMd.clientId},
+                {"clientId", string.IsNullOrEmpty(clientId) ? "" : clientId},
                 {"appId", cfgMd == null ? "" : cfgMd.data.configs.appId + ""},
                 {"did", SystemInfo.deviceUniqueIdentifier},
                 {"sdkLang", LanguageMg.GetLanguageKey()},
@@ -317,14 +276,14 @@ namespace SDK.PC{
                 {"countryCode", ipMd.country_code},
                 {"locationInfoType", "ip"},
                 {"mem", SystemInfo.systemMemorySize / 1024 + "GB"},
-                {"res", paramMd.screenWidth + "_" + paramMd.screenHeight},
+                {"res", Screen.width + "_" + Screen.height},
                 {"mod", SystemInfo.deviceModel},
                 {"sdkVer", XDGSDK.GetSdkVersion()},
                 {"pkgName", PlayerSettings.applicationIdentifier},
                 {"brand", SystemInfo.graphicsDeviceVendor},
                 {"os", SystemInfo.operatingSystem},
                 {"pt", GetPlatform()},
-                {"appVer", PlayerSettings.bundleVersion},
+                {"appVer", XDGSDK.GetSdkVersion()},
                 {"appVerCode", XDGSDK.GetSdkVersionCode()},
                 {"cpu", SystemInfo.processorType}
             };
@@ -333,22 +292,24 @@ namespace SDK.PC{
 
         private static string GetPlatform(){
             string os = "";
-            #if UNITY_STANDALONE_OSX
-               os = "OSX";
-            #endif
-            #if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_OSX
+            os = "OSX";
+#endif
+#if UNITY_STANDALONE_WIN
                os = "WIN";
-            #endif
+#endif
             return os;
         }
 
         private static string LetterStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
         private static string GetRandomStr(int length){
             StringBuilder SB = new StringBuilder();
             Random rd = new Random();
             for (int i = 0; i < length; i++){
                 SB.Append(LetterStr.Substring(rd.Next(0, LetterStr.Length), 1));
             }
+
             return SB.ToString();
         }
     }

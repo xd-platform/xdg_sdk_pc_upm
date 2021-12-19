@@ -14,6 +14,7 @@ namespace SDK.PC{
         public static readonly string IpInfo = "XD_IpInfoKey";
         public static readonly string TokenInfo = "XD_TokenInfo";
         public static readonly string UserInfo = "XD_UserInfo";
+        public static readonly string ClientId = "XD_ClientId";
         
         private static Dictionary<string, string> dataCache;
         private static byte[] Keys ={0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF};
