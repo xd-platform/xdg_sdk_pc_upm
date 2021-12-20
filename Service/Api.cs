@@ -16,7 +16,7 @@ namespace SDK.PC{
         private readonly static string IP_INFO = "https://ip.xindong.com/myloc2";
 
         // login
-        private readonly static string XDG_USER_INFO = BASE_URL + @"/api/account/v1/info";
+        private readonly static string XDG_USER_PROFILE = BASE_URL + @"/api/account/v1/info";
         
         //游客
         private readonly static string  XDG_COMMON_LOGIN  = BASE_URL +  @"/api/login/v1/union";
@@ -36,30 +36,52 @@ namespace SDK.PC{
         private readonly static string TDSG_GLOBAL_SDK_DOMAIN = @"https://xdg-1c20f-intl.xd.com";
 
 
-        public static void InitSDK(string sdkClientId, string tapClientId,
-            Action<bool, InitConfigModel.Data> callback){
+        public static void InitSDK(string sdkClientId,
+            Action<bool> callback){
             DataStorage.SaveString(DataStorage.ClientId, sdkClientId);
             Net.GetRequest(INIT_SDK, null, (data) => {
                 var model = XDGSDK.GetModel<InitConfigModel>(data);
                 InitConfigModel.SaveToLocal(model);
-                TapLogin.Init(tapClientId, false, false);
-                
-                callback(true, model.data);
+                TapLogin.Init(model.data.configs.tapSdkConfig.clientId, false, false);
+                callback(true);
+                XDGSDK.Tmp_IsInited = true;
+                XDGSDK.Tmp_IsInitSDK_ing = false;
             }, (code, msg) => {
                 XDGSDK.Log("初始化失败 code: " + code + " msg: " + msg);
+                callback(false);
+                XDGSDK.Tmp_IsInitSDK_ing = false;
+            });
+        }
+
+        public static void LoginTyType(LoginType loginType, Action<bool, XDGUserModel> callback){
+            Dictionary<string, object> param = new Dictionary<string, object>{
+                {"type", (int)loginType},
+                {"token", SystemInfo.deviceUniqueIdentifier}
+            };
+            Net.PostRequest(XDG_COMMON_LOGIN, param, (data) => {
+                var model = XDGSDK.GetModel<TokenModel>(data);
+                TokenModel.SaveToLocal(model);
+                GetUserInfo((success, userMd) => {
+                    if (success){
+                        callback(true, userMd);
+                    } else{
+                        callback(false, null);
+                    }
+                });
+            }, (code, msg) => {
+                XDGSDK.Log("登录失败 code: " + code + " msg: " + msg);
                 callback(false, null);
             });
         }
 
-        public static void GuestLogin(){
-            Dictionary<string, object> param = new Dictionary<string, object>{
-                {"type", 0},
-                {"token", SystemInfo.deviceUniqueIdentifier}
-            };
-            Net.PostRequest(XDG_COMMON_LOGIN, param, (data) => {
-                
+        public static void GetUserInfo(Action<bool, XDGUserModel> callback){
+            Net.GetRequest(XDG_USER_PROFILE, null, (data) => {
+                var model = XDGSDK.GetModel<XDGUserModel>(data);
+                XDGUserModel.SaveToLocal(model);
+                callback(true, model);
             }, (code, msg) => {
-                
+                XDGSDK.Log("获取用户信息失败 code: " + code + " msg: " + msg);
+                callback(false, null);
             });
         }
 

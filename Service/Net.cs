@@ -87,14 +87,13 @@ namespace SDK.PC{
             Byte[] formData = Encoding.UTF8.GetBytes(jsonString);
             
             UnityWebRequest w = UnityWebRequest.Post(finalUrl,"");
-            w.uploadHandler = new UploadHandlerRaw(formData); //body要这样传！
+            w.uploadHandler = new UploadHandlerRaw(formData); 
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.timeout = 15;
             
             var auth = GetMacToken(finalUrl, "POST");
             if (!string.IsNullOrEmpty(auth)){
                 w.SetRequestHeader("Authorization", auth);
-                XDGSDK.Log("Authorization:" + auth);
             }
 
             if (headers != null){
@@ -123,13 +122,12 @@ namespace SDK.PC{
             } else{
                 string data = w.downloadHandler.text;
                 if (data != null){
-                    string heads = DictToQueryString2(w.GetResponseHeaders());
-                    XDGSDK.Log("发起Post请求：" + finalUrl + "\n\n请求header：" + heads + "\n\n参数：" + jsonString + "请求body:" +jsonString+ "\n\n响应结果：" + data);
+                    XDGSDK.Log("发起Post请求：" + finalUrl + "\n\nbody参数：" + jsonString +  "\n\n响应结果：" + data);
                     methodForResult(data);
                     yield break;
                 } else{
                     XDGSDK.Log("请求失败，response 为空。url: " + finalUrl);
-                    methodForError(GetResponseCode(w), "Empyt response from server : " + finalUrl);
+                    methodForError(GetResponseCode(w), "Empty response from server : " + finalUrl);
                 }
             }
         }
@@ -161,8 +159,7 @@ namespace SDK.PC{
             } else{
                 string data = w.downloadHandler.text;
                 if (data != null){
-                    string heads = DictToQueryString2(w.GetResponseHeaders());
-                    XDGSDK.Log("发起Get请求：" + finalUrl + "\n\n请求头：" + heads + "\n\n响应结果：" + data);
+                    XDGSDK.Log("发起Get请求：" + finalUrl + "\n\n响应结果：" + data);
                     methodForResult(data);
                     yield break;
                 } else{

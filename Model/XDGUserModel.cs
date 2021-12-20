@@ -34,23 +34,15 @@ namespace SDK.PC{
                 string json = DataStorage.LoadString(DataStorage.UserInfo);
                 if (!string.IsNullOrEmpty(json)){
                     currentMd = XDGSDK.GetModel<XDGUserModel>(json);
-                } else{
-                    XDGSDK.Log("User Model 为空");
-                }
+                } 
             }
-
             return currentMd;
         }
 
-        public static void Clear(){
+        public static void Logout(){
             currentMd = null;
             DataStorage.SaveString(DataStorage.UserInfo, "");
-            InitConfigModel.ClearLocalModel();
-            TokenModel.ClearLocalModel();
-        }
-
-        public static bool IsLogin(){
-            return currentMd == null ? false : true;
+            TokenModel.ClearToken();
         }
     }
 }

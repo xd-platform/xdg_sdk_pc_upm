@@ -1,12 +1,12 @@
 namespace SDK.PC{
     public class IpInfoModel : BaseModel{
-        public string city{ get; set; }
-        public string country{ get; set; }
-        public string country_code{ get; set; }
-        public string latitude{ get; set; }
-        public string longitude{ get; set; }
-        public string src_ip{ get; set; }
-        public string timeZone{ get; set; }
+        public string city { get; set; }
+        public string country { get; set; }
+        public string country_code { get; set; }
+        public string latitude { get; set; }
+        public string longitude { get; set; }
+        public string src_ip { get; set; }
+        public string timeZone { get; set; }
 
         private static IpInfoModel currentMd = null;
 

@@ -6,25 +6,66 @@ using Newtonsoft.Json;
 
 namespace SDK.PC{
     public class XDGSDK{
-        private readonly static string VERSION = "6.0.0"; 
-        private readonly static string VERSION_CODE = "6000"; 
+        private readonly static string VERSION = "6.0.0";
+        private readonly static string VERSION_CODE = "6000";
+        public static bool Tmp_IsInited = false;
+        public static bool Tmp_IsInitSDK_ing = false;
 
-        public static void InitSDK(string sdkClientId, string tapClientId, Action<bool, InitConfigModel.Data> callback){
+        public static void InitSDK(string sdkClientId, Action<bool> callback){
+            if (Tmp_IsInitSDK_ing){
+                XDGSDK.Log("正在初始化中...");
+                return;
+            }
+            
+            Tmp_IsInitSDK_ing = true;
             Api.GetIpInfo((success, model) => {
                 if (success){
-                    Api.InitSDK(sdkClientId, tapClientId, callback);       
+                    Api.InitSDK(sdkClientId, callback);
                 } else{
-                    callback(false, null);
+                    callback(false);
+                    Tmp_IsInitSDK_ing = false;
                 }
             });
         }
 
+        public static void LoginTyType(LoginType loginType, Action<bool, XDGUserModel> callback){
+            if (!IsInited()){
+                XDGSDK.Log("请先初始化！");
+                callback(false, null);
+                return;
+            }
+            Api.LoginTyType(loginType, callback);
+        }
+
+        public static void GetUserInfo(Action<bool, XDGUserModel> callback){
+            if (!IsInited()){
+                XDGSDK.Log("请先初始化！");
+                callback(false, null);
+                return;
+            }
+
+            if (TokenModel.GetLocalModel() == null){
+                XDGSDK.Log("请先登录！");
+                callback(false, null);
+                return;
+            }
+            Api.GetUserInfo(callback);
+        }
+
+        public static void Logout(){
+            XDGUserModel.Logout();
+        }
+        
         public static string GetSdkVersion(){
             return VERSION;
         }
-        
+
         public static string GetSdkVersionCode(){
             return VERSION_CODE;
+        }
+
+        public static bool IsInited(){
+            return Tmp_IsInited;
         }
 
         public async static void Login(){
@@ -63,6 +104,7 @@ namespace SDK.PC{
             if (string.IsNullOrEmpty(json)){
                 return null;
             }
+
             return JsonConvert.DeserializeObject<T>(json);
         }
 
@@ -70,6 +112,7 @@ namespace SDK.PC{
             if (model == null){
                 return null;
             }
+
             return JsonConvert.SerializeObject(model);
         }
     }

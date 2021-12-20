@@ -6,10 +6,18 @@ namespace SDK.PC{
     public class InitConfigModel : BaseModel{
         public Data data{ get; set; }
 
-        public class Data{
-            public string version{ get; set; }
-            public int groupId{ get; set; }
-            public Configs configs{ get; set; }
+        public class BindEntriesConfig{
+            public int canBind{ get; set; }
+            public string entryName{ get; set; }
+            public int canUnbind{ get; set; }
+        }
+
+        public class TapSdkConfig{
+            public string clientId{ get; set; }
+            public string tapDBChannel{ get; set; }
+            public string clientToken{ get; set; }
+            public string serverUrl{ get; set; }
+            public bool enableTapDB{ get; set; }
         }
 
         public class Configs{
@@ -24,21 +32,23 @@ namespace SDK.PC{
             public List<string> iosLoginEntries{ get; set; }
             public string californiaPrivacyUrl{ get; set; }
             public string gameName{ get; set; }
+            public TapSdkConfig tapSdkConfig{ get; set; }
             public List<string> tapLoginPermissions{ get; set; }
             public List<string> bindEntries{ get; set; }
-            public int appId{ get; set; }
-            public long facebookClientId{ get; set; }
+            public string appId{ get; set; }
+            public string facebookClientId{ get; set; }
             public string region{ get; set; }
             public bool isKRPushServiceSwitchEnable{ get; set; }
         }
 
-        public class BindEntriesConfig{
-            public int canBind{ get; set; }
-            public string entryName{ get; set; }
-            public int canUnbind{ get; set; }
+        public class Data{
+            public string version{ get; set; }
+            public string groupId{ get; set; }
+            public Configs configs{ get; set; }
         }
-
+        
         private static InitConfigModel currentMd = null;
+
         public static void SaveToLocal(InitConfigModel model){
             if (model != null){
                 string json = XDGSDK.GetJson(model);
@@ -46,21 +56,15 @@ namespace SDK.PC{
                 currentMd = model;
             }
         }
-        
+
         public static InitConfigModel GetLocalModel(){
             if (currentMd == null){
                 string json = DataStorage.LoadString(DataStorage.InitConfig);
                 if (!string.IsNullOrEmpty(json)){
                     currentMd = XDGSDK.GetModel<InitConfigModel>(json);
-                } 
+                }
             }
             return currentMd;
         }
-
-        public static void ClearLocalModel(){
-            currentMd = null;
-            DataStorage.SaveString(DataStorage.InitConfig, "");
-        }
-
     }
 }
