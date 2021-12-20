@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine.Networking;
 using Random = System.Random;
@@ -83,10 +84,13 @@ namespace SDK.PC{
             Dictionary<string, object> finalParameter = parameters ?? new Dictionary<string, object>();
             
             String jsonString = MiniJSON.Json.Serialize(finalParameter);
-            UnityWebRequest w = UnityWebRequest.Post(finalUrl, jsonString);
-            w.SetRequestHeader("Content-Type", "application/json");
+            Byte[] formData = Encoding.UTF8.GetBytes(jsonString);
+            
+            UnityWebRequest w = UnityWebRequest.Post(finalUrl,"");
+            w.uploadHandler = new UploadHandlerRaw(formData); //body要这样传！
+            w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.timeout = 15;
-
+            
             var auth = GetMacToken(finalUrl, "POST");
             if (!string.IsNullOrEmpty(auth)){
                 w.SetRequestHeader("Authorization", auth);
@@ -120,7 +124,7 @@ namespace SDK.PC{
                 string data = w.downloadHandler.text;
                 if (data != null){
                     string heads = DictToQueryString2(w.GetResponseHeaders());
-                    XDGSDK.Log("发起Post请求：" + finalUrl + "\n\n请求头：" + heads + "\n\n参数：" + jsonString + "\n\n响应结果：" + data);
+                    XDGSDK.Log("发起Post请求：" + finalUrl + "\n\n请求header：" + heads + "\n\n参数：" + jsonString + "请求body:" +jsonString+ "\n\n响应结果：" + data);
                     methodForResult(data);
                     yield break;
                 } else{
@@ -137,7 +141,7 @@ namespace SDK.PC{
             string finalUrl = url + "?" + DictToQueryString(parameters) + DictToQueryString2(GetCommonParam(url));
             
             UnityWebRequest w = UnityWebRequest.Get(finalUrl);
-            w.SetRequestHeader("Content-Type", "application/json");
+            w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.timeout = 15;
 
             var auth = GetMacToken(finalUrl, "GET");
@@ -291,12 +295,12 @@ namespace SDK.PC{
         }
 
         private static string GetPlatform(){
-            string os = "";
+            string os = "Linux";
 #if UNITY_STANDALONE_OSX
-            os = "OSX";
+            os = "macOS";
 #endif
 #if UNITY_STANDALONE_WIN
-               os = "WIN";
+               os = "Windows";
 #endif
             return os;
         }

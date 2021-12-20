@@ -56,7 +56,7 @@ namespace SDK.PC{
                 {"type", 0},
                 {"token", SystemInfo.deviceUniqueIdentifier}
             };
-            Net.PostRequest(XDG_COMMON_LOGIN, null, (data) => {
+            Net.PostRequest(XDG_COMMON_LOGIN, param, (data) => {
                 
             }, (code, msg) => {
                 
