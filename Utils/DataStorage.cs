@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
-using System.Collections;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Security.Cryptography;
@@ -12,9 +11,10 @@ namespace SDK.PC{
 
         public static readonly string InitConfig = "XD_InitConfigKey";
         public static readonly string IpInfo = "XD_IpInfoKey";
-        public static readonly string TokenInfo = "XD_TokenInfo";
-        public static readonly string UserInfo = "XD_UserInfo";
-        public static readonly string ClientId = "XD_ClientId";
+        public static readonly string TokenInfo = "XD_TokenInfoKey";
+        public static readonly string UserInfo = "XD_UserInfoKey";
+        public static readonly string ClientId = "XD_ClientIdKey";
+        public static readonly string PrivacyKey = "XD_PrivacyKey";
         
         private static Dictionary<string, string> dataCache;
         private static byte[] Keys ={0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF};
@@ -61,9 +61,6 @@ namespace SDK.PC{
 
 
         private static string EncodeString(string encryptString){
-#if UNITY_IOS || UNITY_ANDROID
-            return encryptString;
-#else
             try{
                 byte[] rgbKey = Encoding.UTF8.GetBytes(GetMacAddress().Substring(0, 8));
                 byte[] rgbIV = Keys;
@@ -80,13 +77,9 @@ namespace SDK.PC{
             catch{
                 return encryptString;
             }
-#endif
         }
 
         private static string DecodeString(string decryptString){
-#if UNITY_IOS || UNITY_ANDROID
-            return decryptString;
-#else
             try{
                 byte[] rgbKey = Encoding.UTF8.GetBytes(GetMacAddress().Substring(0, 8));
                 byte[] rgbIV = Keys;
@@ -103,15 +96,11 @@ namespace SDK.PC{
             catch (Exception e){
                 return decryptString;
             }
-#endif
         }
 
 
         private static string GetMacAddress(){
             string physicalAddress = "FFFFFFFFFFFF";
-#if UNITY_IOS || UNITY_ANDROID
-            return physicalAddress;
-#else
             NetworkInterface[] nice = NetworkInterface.GetAllNetworkInterfaces();
 
             foreach (NetworkInterface adaper in nice){
@@ -131,7 +120,6 @@ namespace SDK.PC{
             }
 
             return physicalAddress;
-#endif
         }
     }
 }

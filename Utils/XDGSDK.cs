@@ -16,8 +16,15 @@ namespace SDK.PC{
                 XDGSDK.Log("正在初始化中...");
                 return;
             }
+
+            if (Tmp_IsInited){
+                callback(true);
+                XDGSDK.Log("已经初始化过了");
+                return;
+            }
             
             Tmp_IsInitSDK_ing = true;
+            XDGUserModel.ClearUserData();
             Api.GetIpInfo((success, model) => {
                 if (success){
                     Api.InitSDK(sdkClientId, callback);
@@ -32,6 +39,12 @@ namespace SDK.PC{
             if (!IsInited()){
                 XDGSDK.Log("请先初始化！");
                 callback(false, null);
+                return;
+            }
+            var md = XDGUserModel.GetLocalModel();
+            if (md != null){
+                XDGSDK.Log("已经登录了");
+                callback(true, md);
                 return;
             }
             Api.LoginTyType(loginType, callback);
@@ -52,8 +65,24 @@ namespace SDK.PC{
             Api.GetUserInfo(callback);
         }
 
+        public static bool IsPushServiceEnable(){
+            var user = XDGUserModel.GetLocalModel();
+            if (user != null){
+                return user.data.isPushEnable;
+            }
+            return false;
+        }
+        
+        public static void SetPushServiceEnable(bool enable){
+            var user = XDGUserModel.GetLocalModel();
+            if (user != null){
+                user.data.isPushEnable = enable;
+                XDGUserModel.SaveToLocal(user);
+            }
+        }
+
         public static void Logout(){
-            XDGUserModel.Logout();
+            XDGUserModel.ClearUserData();
         }
         
         public static string GetSdkVersion(){

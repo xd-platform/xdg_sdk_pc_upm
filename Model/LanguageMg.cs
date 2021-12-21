@@ -7,7 +7,7 @@ using Json = SDK.PC.MiniJSON.Json;
 
 namespace SDK.PC{
     public class LanguageMg{
-        private static LanguageType anguageType = LanguageType.US;
+        private static LanguageType anguageType = LanguageType.CN;
         private static string totalJson = null;
         private static LanguageModel currentModel = null;
 
@@ -71,7 +71,7 @@ namespace SDK.PC{
             } else if (anguageType == LanguageType.RU){
                 return @"ru_RU";
             }
-            return @"en_US";
+            return @"zh_CN";
         }
 
         private static string GetJsonPath(){

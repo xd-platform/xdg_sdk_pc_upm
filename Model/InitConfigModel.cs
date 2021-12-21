@@ -66,5 +66,31 @@ namespace SDK.PC{
             }
             return currentMd;
         }
+
+        public static bool CanShowPrivacyAlert(){
+            var md = GetLocalModel();
+            if (md == null){
+                XDGSDK.Log("请先初始化");
+                return false;
+            } else{
+                var preStr = DataStorage.LoadString(DataStorage.PrivacyKey);
+                var currentStr = $"{md.data.version}-{md.data.configs.serviceAgreementUrl}-{md.data.configs.serviceTermsUrl}";
+                if (string.IsNullOrEmpty(preStr)){
+                    return true;
+                }else if (currentStr.Equals(preStr)){
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        public static void UpdatePrivacyState(){
+            var md = GetLocalModel();
+            if (md != null){
+                var str = $"{md.data.version}-{md.data.configs.serviceAgreementUrl}-{md.data.configs.serviceTermsUrl}";
+                DataStorage.SaveString(DataStorage.PrivacyKey, str);
+            }
+        }
+
     }
 }

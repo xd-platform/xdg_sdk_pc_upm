@@ -17,6 +17,7 @@ namespace SDK.PC{
             public long source{ get; set; }
             public List<string> loginList{ get; set; }
             public bool isGuest{ get; set; }
+            public bool isPushEnable{ get; set; } //本地使用，韩国
         }
 
         private static XDGUserModel currentMd = null;
@@ -39,7 +40,7 @@ namespace SDK.PC{
             return currentMd;
         }
 
-        public static void Logout(){
+        public static void ClearUserData(){
             currentMd = null;
             DataStorage.SaveString(DataStorage.UserInfo, "");
             TokenModel.ClearToken();
