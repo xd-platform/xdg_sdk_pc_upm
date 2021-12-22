@@ -83,9 +83,8 @@ public class PrivacyAlert : UIElement{
             }
             InitConfigModel.UpdatePrivacyState();
             UIManager.Dismiss();
+            OnCallback(UIManager.RESULT_SUCCESS, "点击同意");
         }
-
-        OnCallback(UIManager.RESULT_SUCCESS, "点击同意");
     }
 
     private void updateCheckState(Button button, bool selected){

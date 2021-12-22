@@ -3,11 +3,11 @@ using TapTap.Common;
 using TapTap.Login;
 using UnityEngine;
 using Newtonsoft.Json;
+using UnityEngine.Networking;
 
 namespace SDK.PC{
     public class XDGSDK{
         private readonly static string VERSION = "6.0.0";
-        private readonly static string VERSION_CODE = "6000";
         public static bool Tmp_IsInited = false;
         public static bool Tmp_IsInitSDK_ing = false;
 
@@ -66,19 +66,11 @@ namespace SDK.PC{
         }
 
         public static bool IsPushServiceEnable(){
-            var user = XDGUserModel.GetLocalModel();
-            if (user != null){
-                return user.data.isPushEnable;
-            }
-            return false;
+            return XDGUserModel.IsPushServiceEnable();
         }
         
         public static void SetPushServiceEnable(bool enable){
-            var user = XDGUserModel.GetLocalModel();
-            if (user != null){
-                user.data.isPushEnable = enable;
-                XDGUserModel.SaveToLocal(user);
-            }
+            XDGUserModel.SetPushServiceEnable(enable);
         }
 
         public static void Logout(){
@@ -89,8 +81,14 @@ namespace SDK.PC{
             return VERSION;
         }
 
-        public static string GetSdkVersionCode(){
-            return VERSION_CODE;
+        public static void OpenCustomerCenter(string serverId, string roleId, string roleName){
+            var url = Net.GetCustomerCenterUrl(serverId, roleId, roleName);
+            if (string.IsNullOrEmpty(url)){
+                XDGSDK.Log("请先登录游戏");
+            } else{
+                XDGSDK.Log("客服中心URL: " + url);
+                Application.OpenURL(new WWW(url).url);
+            }
         }
 
         public static bool IsInited(){

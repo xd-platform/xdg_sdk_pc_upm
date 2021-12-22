@@ -84,7 +84,7 @@ namespace SDK.PC{
             }
         }
 
-        public static void UpdatePrivacyState(){
+        public static void UpdatePrivacyState(){ //弹过之后若没变化就不再弹出
             var md = GetLocalModel();
             if (md != null){
                 var str = $"{md.data.version}-{md.data.configs.serviceAgreementUrl}-{md.data.configs.serviceTermsUrl}";

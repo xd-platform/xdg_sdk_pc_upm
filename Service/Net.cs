@@ -284,11 +284,45 @@ namespace SDK.PC{
                 {"brand", SystemInfo.graphicsDeviceVendor},
                 {"os", SystemInfo.operatingSystem},
                 {"pt", GetPlatform()},
-                {"appVer", XDGSDK.GetSdkVersion()},
-                {"appVerCode", XDGSDK.GetSdkVersionCode()},
+                {"appVer", PlayerSettings.bundleVersion},
+                {"appVerCode", PlayerSettings.bundleVersion},
                 {"cpu", SystemInfo.processorType}
             };
             return param;
+        }
+
+        public static string GetCustomerCenterUrl(string serverId, string roleId, string roleName){
+            var clientId = DataStorage.LoadString(DataStorage.ClientId);
+            var userMd = XDGUserModel.GetLocalModel();
+            var cfgMd = InitConfigModel.GetLocalModel();
+            var tkModel = TokenModel.GetLocalModel();
+            if (userMd == null){
+                return null;
+            }
+
+            var uri = new Uri(cfgMd.data.configs.reportUrl);
+            var url = $"{uri.Scheme}://{uri.Host}";
+            Dictionary<string, string> param = new Dictionary<string, string>{
+                {"client_id", string.IsNullOrEmpty(clientId) ? "" : clientId},
+                {"access_token", tkModel.data.kid},
+                {"user_id", userMd.data.userId},
+                {"server_id", serverId},
+                {"role_id", roleId},
+                {"role_name", roleName},
+                {"region", cfgMd.data.configs.region},
+                {"sdk_ver", XDGSDK.GetSdkVersion()},
+                {"sdk_lang", LanguageMg.GetCustomerCenterLang()},
+                {"app_ver", PlayerSettings.bundleVersion},
+                {"app_ver_code", PlayerSettings.bundleVersion},
+                {"res", Screen.width + "_" + Screen.height},
+                {"cpu", SystemInfo.processorType},
+                {"mem", SystemInfo.systemMemorySize / 1024 + "GB"},
+                {"pt", GetPlatform()},
+                {"os", SystemInfo.operatingSystem},
+                {"brand", SystemInfo.graphicsDeviceVendor},
+                {"game_name", PlayerSettings.productName},
+            };
+            return url + "?" + DictToQueryString2(param);
         }
 
         private static string GetPlatform(){

@@ -17,7 +17,6 @@ namespace SDK.PC{
             public long source{ get; set; }
             public List<string> loginList{ get; set; }
             public bool isGuest{ get; set; }
-            public bool isPushEnable{ get; set; } //本地使用，韩国
         }
 
         private static XDGUserModel currentMd = null;
@@ -35,8 +34,9 @@ namespace SDK.PC{
                 string json = DataStorage.LoadString(DataStorage.UserInfo);
                 if (!string.IsNullOrEmpty(json)){
                     currentMd = XDGSDK.GetModel<XDGUserModel>(json);
-                } 
+                }
             }
+
             return currentMd;
         }
 
@@ -44,6 +44,31 @@ namespace SDK.PC{
             currentMd = null;
             DataStorage.SaveString(DataStorage.UserInfo, "");
             TokenModel.ClearToken();
+        }
+
+        public static bool IsPushServiceEnable(){
+            var user = XDGUserModel.GetLocalModel();
+            var result = false;
+            if (user != null){
+                var key = user.data.userId + "_push_key";
+                var value = DataStorage.LoadString(key);
+                if (!string.IsNullOrEmpty(value) && "1".Equals(value)){
+                    result = true;
+                }
+            }
+            return result;
+        }
+
+        public static void SetPushServiceEnable(bool enable){
+            var user = XDGUserModel.GetLocalModel();
+            if (user != null){
+                var key = user.data.userId + "_push_key";
+                if (enable){
+                    DataStorage.SaveString(key, "1");
+                } else{
+                    DataStorage.SaveString(key, "0");
+                }
+            }
         }
     }
 }

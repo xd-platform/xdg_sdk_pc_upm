@@ -73,6 +73,37 @@ namespace SDK.PC{
             }
             return @"zh_CN";
         }
+        
+        public static string GetCustomerCenterLang(){
+            if (anguageType == LanguageType.CN){
+                return @"cn";
+            } else if (anguageType == LanguageType.TW){
+                return @"tw";
+            } else if (anguageType == LanguageType.US){
+                return @"us";
+            } else if (anguageType == LanguageType.TH){
+                return @"th";
+            } else if (anguageType == LanguageType.ID){
+                return @"id";
+            } else if (anguageType == LanguageType.KR){
+                return @"kr";
+            } else if (anguageType == LanguageType.JP){
+                return @"jp";
+            } else if (anguageType == LanguageType.DE){
+                return @"de";
+            } else if (anguageType == LanguageType.FR){
+                return @"fr";
+            } else if (anguageType == LanguageType.PT){
+                return @"pt";
+            } else if (anguageType == LanguageType.ES){
+                return @"es";
+            } else if (anguageType == LanguageType.TR){
+                return @"tr";
+            } else if (anguageType == LanguageType.RU){
+                return @"ru";
+            }
+            return @"cn";
+        }
 
         private static string GetJsonPath(){
             var parentFolder = Directory.GetParent(Application.dataPath)?.FullName;

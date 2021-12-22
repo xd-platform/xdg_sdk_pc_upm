@@ -42,7 +42,7 @@ namespace SDK.PC{
             DataStorage.SaveString(DataStorage.ClientId, sdkClientId);
             Net.GetRequest(INIT_SDK, null, (data) => {
                 var model = XDGSDK.GetModel<InitConfigModel>(data);
-                
+
                 //临时用一下
                 if (model.data.configs.tapSdkConfig == null){
                     XDGSDK.Log("接口没有tap配置，用临时配置");
@@ -66,7 +66,7 @@ namespace SDK.PC{
                     .TapDBConfig(tapCfg.enableTapDB, tapCfg.tapDBChannel, "1.0")
                     .ConfigBuilder();
                 TapBootstrap.Init(config);
-                
+
                 callback(true);
                 XDGSDK.Tmp_IsInited = true;
                 XDGSDK.Tmp_IsInitSDK_ing = false;
@@ -76,7 +76,7 @@ namespace SDK.PC{
                 XDGSDK.Tmp_IsInitSDK_ing = false;
             });
         }
-        
+
         public static void LoginTyType(LoginType loginType, Action<bool, XDGUserModel> callback){
             Dictionary<string, object> param = new Dictionary<string, object>{
                 {"type", (int) loginType},
@@ -92,7 +92,7 @@ namespace SDK.PC{
                                 CheckPrivacyAlert(isPass => {
                                     if (isPass){
                                         callback(true, userMd);
-                                    } 
+                                    }
                                 });
                             } else{
                                 callback(false, null);
@@ -119,7 +119,6 @@ namespace SDK.PC{
                 callback(false);
                 XDGSDK.Log("SyncTdsUser 失败 code: " + code + " msg: " + msg);
             });
-            
         }
 
         public static void GetUserInfo(Action<bool, XDGUserModel> callback){
@@ -162,7 +161,7 @@ namespace SDK.PC{
                 UIManager.ShowUI<PrivacyAlert>(null, (code, objc) => {
                     if (code == UIManager.RESULT_SUCCESS){
                         callback(true);
-                    } 
+                    }
                 });
             } else{
                 callback(true);
