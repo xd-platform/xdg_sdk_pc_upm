@@ -17,6 +17,15 @@ namespace SDK.PC{
             public long source{ get; set; }
             public List<string> loginList{ get; set; }
             public bool isGuest{ get; set; }
+
+            public LoginType GetLoginType(){
+                if (this.loginType == 0){
+                    return LoginType.Guest;
+                } else if (this.loginType == 1){
+                    return LoginType.TapTap;
+                }
+                return LoginType.Guest;
+            }
         }
 
         private static XDGUserModel currentMd = null;
@@ -56,6 +65,7 @@ namespace SDK.PC{
                     result = true;
                 }
             }
+
             return result;
         }
 
