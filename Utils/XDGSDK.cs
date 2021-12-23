@@ -22,7 +22,7 @@ namespace SDK.PC{
                 XDGSDK.Log("已经初始化过了");
                 return;
             }
-            
+
             Tmp_IsInitSDK_ing = true;
             XDGUserModel.ClearUserData();
             Api.GetIpInfo((success, model) => {
@@ -62,13 +62,14 @@ namespace SDK.PC{
                 callback(false, null);
                 return;
             }
+
             Api.GetUserInfo(callback);
         }
 
         public static bool IsPushServiceEnable(){
             return XDGUserModel.IsPushServiceEnable();
         }
-        
+
         public static void SetPushServiceEnable(bool enable){
             XDGUserModel.SetPushServiceEnable(enable);
         }
@@ -76,7 +77,7 @@ namespace SDK.PC{
         public static void Logout(){
             XDGUserModel.ClearUserData();
         }
-        
+
         public static string GetSdkVersion(){
             return VERSION;
         }
@@ -93,26 +94,6 @@ namespace SDK.PC{
 
         public static bool IsInited(){
             return Tmp_IsInited;
-        }
-
-        public async static void Login(){
-            try{
-                // 会显示二维码，玩家可以通过移动设备上的 TapTap 客户端扫码登录
-                var accessToken = await TapLogin.Login();
-                Log($"TapTap 登录成功 accessToken: {accessToken}");
-            } catch (Exception e){
-                if (e is TapException tapError){
-                    if (tapError.code == (int) TapErrorCode.ERROR_CODE_BIND_CANCEL){
-                        Log("Tap 登录取消");
-                    } else{
-                        Log($"Tap 登录失败: code: {tapError.code},  message: {tapError.message}");
-                    }
-                }
-            }
-
-// 获取 TapTap Profile  可以获得当前用户的一些基本信息，例如名称、头像。
-            // var profile = await TapLogin.FetchProfile();
-            // Debug.Log($"TapTap 登录成功 profile: {profile.ToJson()}");
         }
 
         public static void SetLanguage(LanguageType type){

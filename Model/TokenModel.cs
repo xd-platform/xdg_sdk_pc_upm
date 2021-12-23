@@ -5,8 +5,11 @@ namespace SDK.PC{
         public class Data{
             public string kid{ get; set; }
             public string tokenType{ get; set; }
-            public long expireIn{ get; set; }
             public string macKey{ get; set; }
+            
+            public long expireIn{ get; set; }  //游客才有
+            
+            public string macAlgorithm{ get; set; } //tapTap才有
         }
 
         private static TokenModel currentMd = null;

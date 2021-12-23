@@ -15,6 +15,10 @@ public class UserCenterAlert : UIElement{
     private LanguageModel langModel;
     private XDGUserModel userMd;
 
+    public GameObject accountCellPrefab;
+    private int cellCount = 6;
+    public GameObject Content;
+        
     void Start(){
         userMd = XDGUserModel.GetLocalModel();
         langModel = LanguageMg.GetCurrentModel();
@@ -23,7 +27,7 @@ public class UserCenterAlert : UIElement{
         infoTitleTxt.text = langModel.tds_account_info;
         typeTxt.text = $"{langModel.tds_current_account_prefix} ({GetLoginTypeName()})";
         idTxt.text = $"ID: {userMd.data.userId}";
-
+        
     }
 
     private string GetLoginTypeName(){
@@ -43,5 +47,19 @@ public class UserCenterAlert : UIElement{
 
     public void CopyTaped(){
         XDGSDK.Log("点击复制");
+        InitView();
     }
+
+    private List<GameObject> cellList = new List<GameObject>();
+    public void InitView(){
+        // for (int i = 0; i < cellCount; i++){
+            GameObject gameObj = Instantiate(Resources.Load("Prefabs/AccountCell")) as GameObject;
+            gameObj.name = "prefab1";
+            gameObj.transform.localScale= Vector3.one * 2;
+            gameObj.transform.SetParent(Content.transform);
+            gameObj.transform.localPosition = new Vector3(353, -17, 0);
+            cellList.Add(gameObj);
+        // }
+    }
+
 }

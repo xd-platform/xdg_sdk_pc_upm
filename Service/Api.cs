@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using PlasticGui.Configuration.CloudEdition.Welcome;
 using TapTap.Bootstrap;
 using TapTap.Common;
 using TapTap.Login;
+using UnityEditor;
 using UnityEngine;
 
 namespace SDK.PC{
@@ -42,18 +44,6 @@ namespace SDK.PC{
             DataStorage.SaveString(DataStorage.ClientId, sdkClientId);
             Net.GetRequest(INIT_SDK, null, (data) => {
                 var model = XDGSDK.GetModel<InitConfigModel>(data);
-
-                //临时用一下
-                if (model.data.configs.tapSdkConfig == null){
-                    XDGSDK.Log("接口没有tap配置，用临时配置");
-                    model.data.configs.tapSdkConfig = new InitConfigModel.TapSdkConfig();
-                    model.data.configs.tapSdkConfig.clientId = "jfqhF3x9mat70ez52i";
-                    model.data.configs.tapSdkConfig.clientToken = "C91pZh9OJNt7oDPx3lku4H01HelnYjSBS1jaZJed";
-                    model.data.configs.tapSdkConfig.enableTapDB = true;
-                    model.data.configs.tapSdkConfig.tapDBChannel = "tapdb_channel_1";
-                    model.data.configs.tapSdkConfig.serverUrl = "https://jfqhf3x9.cloud.tds1.tapapis.cn";
-                }
-
                 InitConfigModel.SaveToLocal(model);
 
                 var tapCfg = model.data.configs.tapSdkConfig;
@@ -63,7 +53,7 @@ namespace SDK.PC{
                     .ClientToken(tapCfg.clientToken) // 必须，开发者中心对应 Client Token
                     .ServerURL(tapCfg.serverUrl) // 开发者中心 > 你的游戏 > 游戏服务 > 云服务 > 数据存储 > 服务设置 > 自定义域名 绑定域名
                     .RegionType(RegionType.IO) // 非必须，默认 CN 表示国内
-                    .TapDBConfig(tapCfg.enableTapDB, tapCfg.tapDBChannel, "1.0")
+                    .TapDBConfig(tapCfg.enableTapDB, tapCfg.tapDBChannel, PlayerSettings.bundleVersion)
                     .ConfigBuilder();
                 TapBootstrap.Init(config);
 
@@ -78,34 +68,76 @@ namespace SDK.PC{
         }
 
         public static void LoginTyType(LoginType loginType, Action<bool, XDGUserModel> callback){
-            Dictionary<string, object> param = new Dictionary<string, object>{
-                {"type", (int) loginType},
-                {"token", SystemInfo.deviceUniqueIdentifier}
-            };
-            Net.PostRequest(XDG_COMMON_LOGIN, param, (data) => {
-                var model = XDGSDK.GetModel<TokenModel>(data);
-                TokenModel.SaveToLocal(model);
-                GetUserInfo((userSuccess, userMd) => {
-                    if (userSuccess){
-                        SyncTdsUser(tdsSuccess => {
-                            if (tdsSuccess){
-                                CheckPrivacyAlert(isPass => {
-                                    if (isPass){
-                                        callback(true, userMd);
+            GetLoginParam(loginType, (param) => {
+                if (param != null){
+                    Net.PostRequest(XDG_COMMON_LOGIN, param, (data) => {
+                        var model = XDGSDK.GetModel<TokenModel>(data);
+                        TokenModel.SaveToLocal(model);
+
+                        GetUserInfo((userSuccess, userMd) => {
+                            if (userSuccess){
+                                SyncTdsUser(tdsSuccess => {
+                                    if (tdsSuccess){
+                                        CheckPrivacyAlert(isPass => {
+                                            if (isPass){
+                                                callback(true, userMd);
+                                            }
+                                        });
+                                    } else{
+                                        callback(false, null);
                                     }
                                 });
                             } else{
                                 callback(false, null);
                             }
                         });
-                    } else{
+                    }, (code, msg) => {
+                        XDGSDK.Log("登录失败 code: " + code + " msg: " + msg);
                         callback(false, null);
+                    });
+                } else{
+                    callback(false, null);
+                }
+            });
+        }
+
+        private static void GetLoginParam(LoginType loginType, Action<Dictionary<string, object>> callback){
+            if (loginType == LoginType.Guest){
+                Dictionary<string, object> param = new Dictionary<string, object>{
+                    {"type", (int) loginType},
+                    {"token", SystemInfo.deviceUniqueIdentifier}
+                };
+                callback(param);
+            } else if (loginType == LoginType.TapTap){
+                GetTapToken((success, md) => {
+                    if (success){
+                        Dictionary<string, object> param = new Dictionary<string, object>{
+                            {"type", (int) loginType},
+                            {"token", md.kid},
+                            {"secret", md.macKey},
+                        };
+                        callback(param);
+                    } else{
+                        callback(null);
                     }
                 });
-            }, (code, msg) => {
-                XDGSDK.Log("登录失败 code: " + code + " msg: " + msg);
+            }
+        }
+
+        private async static void GetTapToken(Action<bool, AccessToken> callback){
+            try{
+                var accessToken = await TapLogin.Login();
+                callback(true, accessToken);
+            } catch (Exception e){
                 callback(false, null);
-            });
+                if (e is TapException tapError){
+                    if (tapError.code == (int) TapErrorCode.ERROR_CODE_BIND_CANCEL){
+                        XDGSDK.Log("Tap 登录取消");
+                    } else{
+                        XDGSDK.Log($"Tap 登录失败: code: {tapError.code},  message: {tapError.message}");
+                    }
+                }
+            }
         }
 
         private static void SyncTdsUser(Action<bool> callback){
