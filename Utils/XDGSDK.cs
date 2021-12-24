@@ -3,6 +3,7 @@ using TapTap.Common;
 using TapTap.Login;
 using UnityEngine;
 using Newtonsoft.Json;
+using TapTap.Bootstrap;
 using UnityEngine.Networking;
 
 namespace SDK.PC{
@@ -76,6 +77,7 @@ namespace SDK.PC{
 
         public static void Logout(){
             XDGUserModel.ClearUserData();
+            TapLogin.Logout();
         }
 
         public static string GetSdkVersion(){

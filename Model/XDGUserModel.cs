@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PlasticGui.Configuration.CloudEdition.Welcome;
 
 namespace SDK.PC{
     public class XDGUserModel : BaseModel{

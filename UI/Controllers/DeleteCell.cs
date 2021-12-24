@@ -1,18 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using SDK.PC;
+using UnityEngine.UI;
 
-public class DeleteCell : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+public class DeleteCell : UIElement{
+    public Button deleteBt;
+
+    public void setDeleteText(string text){
+        deleteBt.transform.Find("Text").GetComponent<Text>().text = text;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    public void deleteTaped(){
+        OnCallback(UIManager.RESULT_SUCCESS, "点击删除");
     }
 }

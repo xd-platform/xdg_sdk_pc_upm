@@ -1,4 +1,5 @@
-﻿using SDK.PC;
+﻿using System.Collections;
+using SDK.PC;
 using UnityEngine;
 using UnityEngine.UI;
 using ZenFulcrum.EmbeddedBrowser;
@@ -51,6 +52,12 @@ public class PrivacyAlert : UIElement{
         } else{
             centerCheckTextBt.transform.Find("Text").GetComponent<Text>().text = centerStr;
         }
+        Invoke("updatePosition", 0.2f);
+    }
+
+    private  void updatePosition(){
+        var x = centerCheckTextBt.transform.GetComponent<RectTransform>().sizeDelta.x / 2;
+        centerCheckButton.transform.localPosition = new Vector3( -x, -133, 0);
     }
 
     public void leftCheckTap(){
@@ -96,9 +103,9 @@ public class PrivacyAlert : UIElement{
     }
 
     private void updateCenterButton(){
-        var tmp = leftSelected && rightSelected; 
-        if (IsInNorthAmerica()){//年龄必须选中！通知开关选择不是强制的
-            tmp = tmp && centerSelected; 
+        var tmp = leftSelected && rightSelected;
+        if (IsInNorthAmerica()){ //年龄必须选中！通知开关选择不是强制的
+            tmp = tmp && centerSelected;
         }
         selectCenterBt(tmp);
     }

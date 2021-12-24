@@ -28,7 +28,7 @@ namespace SDK.PC{
         private readonly static string XDG_LOGIN_SYN = BASE_URL + @"/api/login/v1/syn";
 
         // 获取用户绑定信息
-        private readonly static string XDG_CHECK_BIND_STATU = BASE_URL + @"/api/account/v1/bind/list";
+        private readonly static string XDG_BIND_LIST = BASE_URL + @"/api/account/v1/bind/list";
 
         // 三方绑定接口
         private readonly static string XDG_BIND_INTERFACE = BASE_URL + @"/api/account/v1/bind";
@@ -198,6 +198,15 @@ namespace SDK.PC{
             } else{
                 callback(true);
             }
+        }
+
+        public static void GetBindList(Action<bool, BindModel> callback){
+            Net.GetRequest(XDG_BIND_LIST, null, (data) => {
+                var md = XDGSDK.GetModel<BindModel>(data);
+                callback(true, md);
+            }, (code, msg) => {
+                callback(false, null);
+            });
         }
     }
 }
