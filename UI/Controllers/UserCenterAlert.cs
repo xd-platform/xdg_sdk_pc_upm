@@ -85,9 +85,20 @@ public class UserCenterAlert : UIElement{
             cellList.Add(gameObj);
 
             AccountCell cell = gameObj.GetComponent<AccountCell>();
+            cell.cellIndex = i;
             cell.refreshModel(dataList[i], langModel);
-            cell.Callback += (code, msg) => { //cell 事件回调
-
+            cell.Callback += (cellIndex, msg) => { //cell 事件回调
+                var md = dataList[cellIndex];
+                if (md.status == 1){ 
+                    var dic = new Dictionary<string, object>(){
+                        {"loginType", md.loginType},
+                    };
+                    UIManager.ShowUI<DeleteAccountAlert>(dic, (code, data) => {
+                        unbind((LoginType)md.loginType);  
+                    });
+                } else{
+                    bind((LoginType)md.loginType);   
+                }
             };
         }
 
@@ -101,9 +112,22 @@ public class UserCenterAlert : UIElement{
             DeleteCell cell = gameObj.GetComponent<DeleteCell>();
             cell.setDeleteText(langModel.tds_delete_account);
             cell.Callback += (code, msg) => { //delete 事件回调
-
+                  unbind(LoginType.Guest);
             };
         }
+    }
+
+
+    private void bind(LoginType loginType){
+        XDGSDK.Log("绑定： " + loginType);
+        
+        
+    }
+
+    private void unbind(LoginType loginType){
+        XDGSDK.Log("解绑： " + loginType);
+        
+        UIManager.DismissAll();
     }
 
     private List<LoginTypeModel> GetSupportTypes(){ //网络和本地支持的过滤一下

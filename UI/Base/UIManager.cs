@@ -125,9 +125,10 @@ namespace SDK.PC{
                 UIAnimator animator = UI.GetComponent<UIAnimator>(containerObj);
                 element.OnEnter();
                 animator.DoEnterAnimation(lastElement, element, () => {
-                    if (lastElement != null){
-                        lastElement.OnPause();
-                    }
+                    //隐藏前一个弹框
+                    // if (lastElement != null){
+                    //     lastElement.OnPause();
+                    // }
                 });
             }
         }

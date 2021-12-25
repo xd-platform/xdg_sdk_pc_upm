@@ -1,4 +1,5 @@
-﻿using SDK.PC;
+﻿using System.Collections.Generic;
+using SDK.PC;
 using UnityEngine.UI;
 
 public class DeleteCell : UIElement{
@@ -9,6 +10,11 @@ public class DeleteCell : UIElement{
     }
 
     public void deleteTaped(){
-        OnCallback(UIManager.RESULT_SUCCESS, "点击删除");
+        var dic = new Dictionary<string, object>(){
+            {"loginType", 0},
+        };
+        UIManager.ShowUI<DeleteAccountAlert>(dic, (code, msg) => {
+                OnCallback(UIManager.RESULT_SUCCESS, "删除账号");
+        });
     }
 }

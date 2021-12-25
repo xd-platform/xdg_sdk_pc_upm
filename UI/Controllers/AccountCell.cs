@@ -11,6 +11,7 @@ public class AccountCell : UIElement{
     private BindModel.Data cellModel;
     private LanguageModel langMd;
 
+    public int cellIndex = 0;
     public Image iconImage;
     public Text nameText;
     public Button bindBt;
@@ -41,9 +42,6 @@ public class AccountCell : UIElement{
     }
 
     public void bindButtonTap(){
-        if (cellModel.status == 1){ //当前是绑定，开始解绑
-            XDGSDK.Log("解绑");
-        } else{ //开始绑定
-        }
+        OnCallback(cellIndex, "code 是cell index");
     }
 }
