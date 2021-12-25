@@ -2,18 +2,19 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace SDK.PC{
     [DisallowMultipleComponent]
     public class UIManager : MonoBehaviour{
-        
         public static readonly int RESULT_FAILED = -1;
         public static readonly int RESULT_SUCCESS = 0;
         public static readonly int RESULT_BACK = 1;
         public static readonly int RESULT_CLOSE = 2;
-        
+
         private static GameObject managerObject;
         private GameObject containerObj;
+        private Button toastBt;
         private readonly List<UIElement> uiElements = new List<UIElement>();
 
         public static void Dismiss(){
@@ -50,15 +51,33 @@ namespace SDK.PC{
         }
 
         public static void ShowToast(string msg){
-            
+            var mg = Instance();
+            if (mg.containerObj == null){
+                mg.CreateContainer();
+            }
+
+            if (mg.toastBt != null){
+                mg.toastBt.transform.Find("Text").GetComponent<Text>().text = msg;
+                mg.toastBt.transform.SetSiblingIndex(1000);
+                mg.toastBt.gameObject.SetActive(true);
+                mg.Invoke("hideToast", 1);
+            } else{
+                XDGSDK.Log("提示控件是空");
+            }
+        }
+
+        public void hideToast(){
+            var mg = Instance();
+            if (mg.toastBt != null){
+                mg.toastBt.transform.SetSiblingIndex(0);
+                mg.toastBt.gameObject.SetActive(false);
+            }
         }
 
         public static void ShowLoading(){
-            
         }
 
         public static void DismissLoading(){
-            
         }
 
         private static UIManager Instance(){
@@ -81,6 +100,9 @@ namespace SDK.PC{
             UIAnimator containerAnimator = UI.GetComponent<UIAnimator>(containerObj);
             containerElement.OnEnter();
             containerAnimator.DoEnterAnimation(null, containerElement, () => { });
+
+            toastBt = containerObj.gameObject.GetComponentInChildren<Button>(); //toast button
+            toastBt.gameObject.SetActive(false);
         }
 
         private void DestroyContainer(){
@@ -102,8 +124,7 @@ namespace SDK.PC{
             GameObject gameObj = Instantiate(Resources.Load("Prefabs/" + prefabName)) as GameObject;
             if (gameObj == null){
                 XDGSDK.LogError("没找到 prefab named： \"" + prefabName + "\"");
-            }
-            else{
+            } else{
                 if (uiElements.Count == 0 && containerObj == null){
                     CreateContainer();
                 }
@@ -136,8 +157,7 @@ namespace SDK.PC{
         private void PopUIElement(string targetName){
             if (containerObj == null || uiElements.Count == 0){
                 XDGSDK.LogError("没有 UIElement 子类可处理.");
-            }
-            else{
+            } else{
                 UIElement element = uiElements[uiElements.Count - 1];
 
                 if (targetName != null && !targetName.Equals(element.name)){
