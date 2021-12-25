@@ -8,6 +8,7 @@ public class UserCenterAlert : UIElement{
     public Text infoTitleTxt;
     public Text typeTxt;
     public Text idTxt;
+    public GameObject errorView;
 
     private LanguageModel langModel;
     private XDGUserModel userMd;
@@ -26,6 +27,8 @@ public class UserCenterAlert : UIElement{
         infoTitleTxt.text = langModel.tds_account_info;
         typeTxt.text = $"{langModel.tds_current_account_prefix} ({GetLoginTypeName()})";
         idTxt.text = $"ID: {userMd.data.userId}";
+        errorView.GetComponentInChildren<Text>().text = langModel.tds_loading_error_retry;
+        
         requestList();
     }
 
@@ -49,29 +52,35 @@ public class UserCenterAlert : UIElement{
     }
 
     private void requestList(){
-        Api.GetBindList((success, bindModel) => {
-            if (success){
-                dataList = new List<BindModel.Data>();
-                var supportList = GetSupportTypes();
-                foreach (var st in supportList){ //本地支持的都要显示
-                    var md = new BindModel.Data();
-                    md.loginType = st.typeValue;
-                    md.loginName = st.typeName;
+        if (dataList == null){
+            Api.GetBindList((success, bindModel) => {
+                if (success){
+                    dataList = new List<BindModel.Data>();
+                    var supportList = GetSupportTypes();
+                    foreach (var st in supportList){ //本地支持的都要显示
+                        var md = new BindModel.Data();
+                        md.loginType = st.typeValue;
+                        md.loginName = st.typeName;
 
-                    foreach (var netMd in bindModel.data){ //插入对应的状态
-                        if (st.typeValue == netMd.loginType){
-                            md.status = netMd.status;
-                            md.bindDate = netMd.bindDate;
-                            break;
+                        foreach (var netMd in bindModel.data){ //插入对应的状态
+                            if (st.typeValue == netMd.loginType){
+                                md.status = netMd.status;
+                                md.bindDate = netMd.bindDate;
+                                break;
+                            }
                         }
+
+                        dataList.Add(md);
                     }
-                    dataList.Add(md);
+
+                    addCellView();
+                    errorView.SetActive(false);
+                } else{
+                    errorView.SetActive(true);
+                    XDGSDK.Log("列表请求失败");
                 }
-                addCellView();
-            } else{
-                XDGSDK.Log("列表请求失败");
-            }
-        });
+            });
+        }
     }
 
     private void addCellView(){
@@ -88,15 +97,14 @@ public class UserCenterAlert : UIElement{
             cell.setModel(dataList[i], langModel);
             cell.Callback += (cellIndex, msg) => { //cell 事件回调
                 var md = dataList[cellIndex];
-                if (md.status == 1){ 
+                if (md.status == 1){
                     var dic = new Dictionary<string, object>(){
                         {"loginType", md.loginType},
                     };
-                    UIManager.ShowUI<DeleteAccountAlert>(dic, (code, data) => {
-                        unbind((LoginType)md.loginType, cellIndex);  
-                    });
+                    UIManager.ShowUI<DeleteAccountAlert>(dic,
+                        (code, data) => { unbind((LoginType) md.loginType, cellIndex); });
                 } else{
-                    bind((LoginType)md.loginType, cellIndex);   
+                    bind((LoginType) md.loginType, cellIndex);
                 }
             };
             cellList.Add(cell);
@@ -108,11 +116,11 @@ public class UserCenterAlert : UIElement{
             gameObj.transform.SetParent(Content.transform);
             gameObj.transform.localPosition = new Vector3(350, -cellHeight / 2 - (cellHeight * cellList.Count) - 10, 0);
             gameObj.transform.localScale = Vector3.one;
-            
+
             DeleteCell cell = gameObj.GetComponent<DeleteCell>();
             cell.setDeleteText(langModel.tds_delete_account);
             cell.Callback += (code, msg) => { //delete 事件回调
-                  unbind(LoginType.Guest, -1);
+                unbind(LoginType.Guest, -1);
             };
         }
     }
@@ -170,6 +178,7 @@ public class UserCenterAlert : UIElement{
                 }
             }
         }
+
         return list;
     }
 
@@ -177,5 +186,9 @@ public class UserCenterAlert : UIElement{
         var list = new List<LoginTypeModel>();
         list.Add(new LoginTypeModel(LoginType.TapTap));
         return list;
+    }
+
+    public void errorViewTap(){
+        requestList();
     }
 }
