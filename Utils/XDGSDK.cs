@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TapTap.Common;
 using TapTap.Login;
 using UnityEngine;
@@ -132,6 +133,30 @@ namespace SDK.PC{
             }
 
             return JsonConvert.SerializeObject(model);
+        }
+
+        public static void CheckPay(){
+            Api.checkPay((success, model) => {
+                if (success && model.data.list != null && model.data.list.Count > 0){
+                    var hasIOS = false;
+                    var hasAndroid = false;
+                    foreach (var md in model.data.list){
+                        if (md.platform == 1){
+                            hasIOS = true;
+                        }
+                        if (md.platform == 2){
+                            hasAndroid = true;
+                        }
+                    }
+                    if (hasIOS || hasAndroid){
+                        var param = new Dictionary<string, object>(){
+                            {"hasIOS",hasIOS ?  1 : 0},
+                            {"hasAndroid",hasAndroid ? 1 : 0},
+                        };
+                        UIManager.ShowUI<PayHintAlert>(param, null);   
+                    }
+                }
+            });
         }
     }
 }
