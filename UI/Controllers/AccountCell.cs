@@ -17,9 +17,14 @@ public class AccountCell : UIElement{
     public Button bindBt;
     public Image arrowImage;
 
-    public void refreshModel(BindModel.Data model, LanguageModel langMd){
+    public void setModel(BindModel.Data model, LanguageModel langMd){
         this.cellModel = model;
         this.langMd = langMd;
+    }
+    
+    public void refreshState(BindModel.Data model){
+        this.cellModel = model;
+        Start();
     }
 
     private void Start(){
@@ -28,10 +33,10 @@ public class AccountCell : UIElement{
             if (cellModel.loginType == (int) LoginType.TapTap){
                 iconImage.sprite = Resources.Load("Images/type_icon_tap", typeof(Sprite)) as Sprite;
             }
-
+            
             if (cellModel.status == 1){ //已绑定
                 bindBt.transform.Find("Text").GetComponent<Text>().text = langMd.tds_unbind;
-                bindBt.transform.Find("Text").GetComponent<Text>().color = new Color(15, 153, 153);
+                bindBt.transform.Find("Text").GetComponent<Text>().color = new Color(0.6f, 0.6f, 0.6f, 1f);
                 arrowImage.sprite = Resources.Load("Images/arrow_gray", typeof(Sprite)) as Sprite;
             } else{
                 bindBt.transform.Find("Text").GetComponent<Text>().text = langMd.tds_bind;

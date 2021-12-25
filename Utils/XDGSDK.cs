@@ -94,6 +94,14 @@ namespace SDK.PC{
             }
         }
 
+        public static void OpenUserCenter(){
+            if (XDGUserModel.GetLocalModel() == null){
+                XDGSDK.Log("请先登录");
+                return;
+            }
+            UIManager.ShowUI<UserCenterAlert>(null, null);
+        }
+
         public static bool IsInited(){
             return Tmp_IsInited;
         }

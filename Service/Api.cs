@@ -30,10 +30,10 @@ namespace SDK.PC{
         // 获取用户绑定信息
         private readonly static string XDG_BIND_LIST = BASE_URL + @"/api/account/v1/bind/list";
 
-        // 三方绑定接口
+        // 绑定接口
         private readonly static string XDG_BIND_INTERFACE = BASE_URL + @"/api/account/v1/bind";
 
-        // 三方解绑接口
+        // 解绑接口
         private readonly static string XDG_UNBIND_INTERFACE = BASE_URL + @"/api/account/v1/unbind";
 
         private readonly static string TDSG_GLOBAL_SDK_DOMAIN = @"https://xdg-1c20f-intl.xd.com";
@@ -101,7 +101,7 @@ namespace SDK.PC{
             });
         }
 
-        private static void GetLoginParam(LoginType loginType, Action<Dictionary<string, object>> callback){
+        public static void GetLoginParam(LoginType loginType, Action<Dictionary<string, object>> callback){
             if (loginType == LoginType.Guest){
                 Dictionary<string, object> param = new Dictionary<string, object>{
                     {"type", (int) loginType},
@@ -204,9 +204,23 @@ namespace SDK.PC{
             Net.GetRequest(XDG_BIND_LIST, null, (data) => {
                 var md = XDGSDK.GetModel<BindModel>(data);
                 callback(true, md);
-            }, (code, msg) => {
-                callback(false, null);
-            });
+            }, (code, msg) => { callback(false, null); });
+        }
+
+        public static void bind(Dictionary<string, object>param, Action<bool> callback){
+            
+        }
+
+        public static void unbind(LoginType loginType, Action<bool> callback){
+            var param = new Dictionary<string, object>(){
+                {"type", (int) loginType}
+            };
+            Net.PostRequest(XDG_UNBIND_INTERFACE, param, (data) => {
+                    callback(true);
+                },
+                (code, msg) => {
+                    callback(false);
+                });
         }
     }
 }

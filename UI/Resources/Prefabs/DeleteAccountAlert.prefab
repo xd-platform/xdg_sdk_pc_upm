@@ -97,10 +97,10 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_PressedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_SelectedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_DisabledColor: {r: 1, g: 1, b: 1, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -118,7 +118,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 9005566113235866257}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3113472160561887569}
+        m_MethodName: sureOneTap
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &244792826971105814
 GameObject:
   m_ObjectHideFlags: 0
@@ -132,7 +143,7 @@ GameObject:
   - component: {fileID: 3071016151962186434}
   - component: {fileID: 2907528951969847018}
   m_Layer: 5
-  m_Name: Button
+  m_Name: CancelButtonTwo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -216,10 +227,10 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_HighlightedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_PressedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_SelectedColor: {r: 1, g: 1, b: 1, a: 1}
+    m_DisabledColor: {r: 1, g: 1, b: 1, a: 1}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
@@ -237,7 +248,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3071016151962186434}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3113472160561887569}
+        m_MethodName: cancelTwoTap
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &472520323233107279
 GameObject:
   m_ObjectHideFlags: 0
@@ -255,7 +277,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &304349254991459486
 RectTransform:
   m_ObjectHideFlags: 0
@@ -327,6 +349,7 @@ GameObject:
   - component: {fileID: 1146180222129618912}
   - component: {fileID: 5510067494407564928}
   - component: {fileID: 276924616541247709}
+  - component: {fileID: 3113472160561887569}
   m_Layer: 5
   m_Name: DeleteAccountAlert
   m_TagString: Untagged
@@ -392,6 +415,30 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3113472160561887569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 631356263948216088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 747aa853d5d5a405791a5fb128ff46e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pannelOne: {fileID: 472520323233107279}
+  titleOne: {fileID: 4210992697334056784}
+  msgOne: {fileID: 6244788065940259697}
+  cancelOne: {fileID: 578882598182975372}
+  sureOne: {fileID: 5574724913730396937}
+  pannelTwo: {fileID: 5480724108092228402}
+  fieldTwo: {fileID: 8495234505053573863}
+  hintTxt: {fileID: 1346504605273998216}
+  titleTwo: {fileID: 2104075133475666251}
+  msgTwo: {fileID: 1609150113621984617}
+  cancelTwo: {fileID: 2907528951969847018}
+  sureTwo: {fileID: 3286568921535721795}
 --- !u!1 &907277847241116158
 GameObject:
   m_ObjectHideFlags: 0
@@ -405,7 +452,7 @@ GameObject:
   - component: {fileID: 1093198978436228176}
   - component: {fileID: 3286568921535721795}
   m_Layer: 5
-  m_Name: Button
+  m_Name: SureButtonTwo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -510,7 +557,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1093198978436228176}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3113472160561887569}
+        m_MethodName: sureTwoTap
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &978316461068679601
 GameObject:
   m_ObjectHideFlags: 0
@@ -666,7 +724,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Enter text...
+  m_Text: '
+
+'
 --- !u!1 &1333530560144255163
 GameObject:
   m_ObjectHideFlags: 0
@@ -757,7 +817,7 @@ GameObject:
   - component: {fileID: 1163104221195053704}
   - component: {fileID: 1609150113621984617}
   m_Layer: 5
-  m_Name: Text
+  m_Name: MsgTextTwo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -991,7 +1051,7 @@ GameObject:
   - component: {fileID: 5952190467058727946}
   - component: {fileID: 2104075133475666251}
   m_Layer: 5
-  m_Name: Text
+  m_Name: TitleTextTwo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1152,7 +1212,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4324644272337576322
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1228,7 +1288,7 @@ GameObject:
   - component: {fileID: 8495242146020799700}
   - component: {fileID: 8495234505053573863}
   m_Layer: 5
-  m_Name: InputField
+  m_Name: InputFieldTwo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1276,13 +1336,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.9858491, b: 0.9858491, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: cd71b3765ff6242b687ff0152a877d51, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1368,7 +1428,7 @@ GameObject:
   - component: {fileID: 834315268145960482}
   - component: {fileID: 1346504605273998216}
   m_Layer: 5
-  m_Name: Text
+  m_Name: HintTextTwo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1390,8 +1450,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -48.38, y: -36.1}
-  m_SizeDelta: {x: 161.15222, y: 19.199997}
+  m_AnchoredPosition: {x: -30, y: -36.1}
+  m_SizeDelta: {x: 197.9162, y: 19.199997}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &834315268145960482
 CanvasRenderer:
@@ -1414,7 +1474,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8773585, g: 0.30210927, b: 0.30210927, a: 1}
+  m_Color: {r: 0.83137256, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -1433,7 +1493,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u8F93\u5165\u4E0D\u6B63\u786E"
+  m_Text: 
 --- !u!1 &8349967086188222505
 GameObject:
   m_ObjectHideFlags: 0
@@ -1708,4 +1768,15 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2740234149950889873}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3113472160561887569}
+        m_MethodName: cancelOneTap
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2

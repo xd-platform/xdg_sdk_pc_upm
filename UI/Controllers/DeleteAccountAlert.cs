@@ -85,6 +85,7 @@ public class DeleteAccountAlert : UIElement{
                 inputError = true;
             } else{
                 OnCallback(UIManager.RESULT_SUCCESS, "确认删除或解绑");
+                UIManager.Dismiss();
             }
         } else{
             if (!"Confirm".Equals(str)){
@@ -93,6 +94,7 @@ public class DeleteAccountAlert : UIElement{
                 hintTxt.text = langMd.tds_input_error;
             } else{
                 OnCallback(UIManager.RESULT_SUCCESS, "确认删除或解绑");
+                UIManager.Dismiss();
             }
         }
     }

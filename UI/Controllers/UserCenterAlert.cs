@@ -16,7 +16,7 @@ public class UserCenterAlert : UIElement{
     private float cellHeight = 36.0f;
 
     private List<BindModel.Data> dataList;
-    private List<GameObject> cellList;
+    private List<AccountCell> cellList;
 
     void Start(){
         userMd = XDGUserModel.GetLocalModel();
@@ -75,18 +75,17 @@ public class UserCenterAlert : UIElement{
     }
 
     private void addCellView(){
-        cellList = new List<GameObject>();
+        cellList = new List<AccountCell>();
         for (int i = 0; i < dataList.Count; i++){
             GameObject gameObj = Instantiate(Resources.Load("Prefabs/AccountCell")) as GameObject;
             gameObj.name = "AccountCell" + i;
             gameObj.transform.SetParent(Content.transform);
             gameObj.transform.localPosition = new Vector3(350, -cellHeight / 2 - (cellHeight * i), 0);
             gameObj.transform.localScale = Vector3.one;
-            cellList.Add(gameObj);
 
             AccountCell cell = gameObj.GetComponent<AccountCell>();
             cell.cellIndex = i;
-            cell.refreshModel(dataList[i], langModel);
+            cell.setModel(dataList[i], langModel);
             cell.Callback += (cellIndex, msg) => { //cell 事件回调
                 var md = dataList[cellIndex];
                 if (md.status == 1){ 
@@ -94,12 +93,13 @@ public class UserCenterAlert : UIElement{
                         {"loginType", md.loginType},
                     };
                     UIManager.ShowUI<DeleteAccountAlert>(dic, (code, data) => {
-                        unbind((LoginType)md.loginType);  
+                        unbind((LoginType)md.loginType, cellIndex);  
                     });
                 } else{
-                    bind((LoginType)md.loginType);   
+                    bind((LoginType)md.loginType, cellIndex);   
                 }
             };
+            cellList.Add(cell);
         }
 
         if (userMd.data.loginType == (int) LoginType.Guest){ //游客添加删除
@@ -112,22 +112,50 @@ public class UserCenterAlert : UIElement{
             DeleteCell cell = gameObj.GetComponent<DeleteCell>();
             cell.setDeleteText(langModel.tds_delete_account);
             cell.Callback += (code, msg) => { //delete 事件回调
-                  unbind(LoginType.Guest);
+                  unbind(LoginType.Guest, -1);
             };
         }
     }
 
 
-    private void bind(LoginType loginType){
+    private void bind(LoginType loginType, int cellIndex){
         XDGSDK.Log("绑定： " + loginType);
-        
-        
+        if (loginType == LoginType.TapTap){
+            Api.GetLoginParam(loginType, (param) => {
+                Api.bind(param, (success) => {
+                    if (success){
+                        var cellMd = dataList[cellIndex];
+                        var cellView = cellList[cellIndex];
+                        cellMd.status = 1;
+                        cellView.refreshState(cellMd);
+                        UIManager.ShowToast(langModel.tds_unbind_success);
+                    } else{
+                        UIManager.ShowToast(langModel.tds_bind_error);
+                    }
+                });
+            });
+        }
     }
 
-    private void unbind(LoginType loginType){
+    private void unbind(LoginType loginType, int cellIndex){
         XDGSDK.Log("解绑： " + loginType);
-        
-        UIManager.DismissAll();
+        Api.unbind(loginType, (success) => {
+            if (success){
+                if (loginType == LoginType.Guest){
+                    UIManager.ShowToast(langModel.tds_logout);
+                    XDGSDK.Logout();
+                    UIManager.DismissAll();
+                } else{
+                    var cellMd = dataList[cellIndex];
+                    var cellView = cellList[cellIndex];
+                    cellMd.status = 0;
+                    cellView.refreshState(cellMd);
+                    UIManager.ShowToast(langModel.tds_unbind_success);
+                }
+            } else{
+                UIManager.ShowToast(langModel.tds_unbind_error);
+            }
+        });
     }
 
     private List<LoginTypeModel> GetSupportTypes(){ //网络和本地支持的过滤一下
