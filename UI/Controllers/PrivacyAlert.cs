@@ -2,13 +2,13 @@
 using SDK.PC;
 using UnityEngine;
 using UnityEngine.UI;
-using ZenFulcrum.EmbeddedBrowser;
+// using ZenFulcrum.EmbeddedBrowser;
 
 public class PrivacyAlert : UIElement{
     public Text titleText;
 
-    public Browser leftWeb;
-    public Browser rightWeb;
+    // public Browser leftWeb;
+    // public Browser rightWeb;
 
     public Button leftCheckButton;
     public Button leftCheckTextBt;
@@ -32,8 +32,8 @@ public class PrivacyAlert : UIElement{
         cfgModel = InitConfigModel.GetLocalModel();
         langModel = LanguageMg.GetCurrentModel();
 
-        leftWeb.Url = cfgModel.data.configs.serviceTermsUrl;
-        rightWeb.Url = cfgModel.data.configs.serviceAgreementUrl;
+        // leftWeb.Url = cfgModel.data.configs.serviceTermsUrl;
+        // rightWeb.Url = cfgModel.data.configs.serviceAgreementUrl;
 
         RefreshLanguage();
     }

@@ -29,11 +29,9 @@ namespace SDK.PC{
 
         private static void UpdateLanguageModel(){
             if (totalJson == null){
-                string path = GetJsonPath();
-                if (!File.Exists(path)){
-                    XDGSDK.LogError("language json path 不存在：" + path);
-                } else{
-                    totalJson = File.ReadAllText(path);
+                var txtAsset = Resources.Load("Language") as TextAsset;
+                if (txtAsset != null){
+                    totalJson = txtAsset.text;
                 }
             }
 

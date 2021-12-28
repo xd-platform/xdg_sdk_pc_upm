@@ -1,6 +1,5 @@
 {
   "name": "XDGSDK",
-  "references": ["ZFBrowser"],
   "includePlatforms": [
     "Editor",
     "macOSStandalone",

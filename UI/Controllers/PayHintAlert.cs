@@ -18,15 +18,12 @@ public class PayHintAlert : UIElement{
         titleTxt.text = langMd.tds_refund_login_restrict_title;
         subTitleTxt.text = langMd.tds_refund_login_restrict_sub_title;
         bottomTxt.text = $"<color=#999999>{langMd.tds_refund_custom_service_tip}</color><color=black>{langMd.tds_refund_contact_custom_service}</color>";
-        Invoke("updateMsg",0.5f);
-    }
-
-    private void updateMsg(){
-        var hasIOS = SafeDictionary.GetValue<int>(extra, "hasIOS");
-        var hasAndroid = SafeDictionary.GetValue<int>(extra, "hasAndroid");
-        if (hasIOS == 1 && hasAndroid == 1){
+       
+        var hasIOS = SafeDictionary.GetValue<bool>(extra, "hasIOS");
+        var hasAndroid = SafeDictionary.GetValue<bool>(extra, "hasAndroid");
+        if (hasIOS  && hasAndroid ){
             mstTxt.text = langMd.tds_refund_ios_pay_tip; //待修改
-        }else if (hasIOS == 1){
+        }else if (hasIOS){
             mstTxt.text = langMd.tds_refund_ios_pay_tip;
         } else{
             mstTxt.text = langMd.tds_refund_android_pay_tip;   

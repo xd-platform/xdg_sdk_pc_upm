@@ -280,12 +280,12 @@ namespace SDK.PC{
                 {"res", Screen.width + "_" + Screen.height},
                 {"mod", SystemInfo.deviceModel},
                 {"sdkVer", XDGSDK.GetSdkVersion()},
-                {"pkgName", PlayerSettings.applicationIdentifier},
+                {"pkgName", Application.identifier},
                 {"brand", SystemInfo.graphicsDeviceVendor},
                 {"os", SystemInfo.operatingSystem},
                 {"pt", GetPlatform()},
-                {"appVer", PlayerSettings.bundleVersion},
-                {"appVerCode", PlayerSettings.bundleVersion},
+                {"appVer", Application.version},
+                {"appVerCode", Application.version},
                 {"cpu", SystemInfo.processorType}
             };
             return param;
@@ -312,15 +312,34 @@ namespace SDK.PC{
                 {"region", cfgMd.data.configs.region},
                 {"sdk_ver", XDGSDK.GetSdkVersion()},
                 {"sdk_lang", LanguageMg.GetCustomerCenterLang()},
-                {"app_ver", PlayerSettings.bundleVersion},
-                {"app_ver_code", PlayerSettings.bundleVersion},
+                {"app_ver", Application.version},
+                {"app_ver_code", Application.version},
                 {"res", Screen.width + "_" + Screen.height},
                 {"cpu", SystemInfo.processorType},
                 {"mem", SystemInfo.systemMemorySize / 1024 + "GB"},
                 {"pt", GetPlatform()},
                 {"os", SystemInfo.operatingSystem},
                 {"brand", SystemInfo.graphicsDeviceVendor},
-                {"game_name", PlayerSettings.productName},
+                {"game_name", Application.productName},
+            };
+            return url + "?" + DictToQueryString2(param);
+        }
+        
+        public static string GetPayUrl(string serverId, string roleId){
+            var userMd = XDGUserModel.GetLocalModel();
+            var cfgMd = InitConfigModel.GetLocalModel();
+            if (userMd == null){
+                return null;
+            }
+
+            var uri = new Uri(cfgMd.data.configs.webPayUrl);
+            var url = $"{uri.Scheme}://{uri.Host}";
+            Dictionary<string, string> param = new Dictionary<string, string>{
+                {"serverId", serverId},
+                {"roleId", roleId},
+                {"region", cfgMd.data.configs.region},
+                {"appId",  cfgMd.data.configs.appId},
+                {"lang", Application.systemLanguage.ToString()},
             };
             return url + "?" + DictToQueryString2(param);
         }

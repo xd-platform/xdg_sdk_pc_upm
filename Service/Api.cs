@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using PlasticGui.Configuration.CloudEdition.Welcome;
 using TapTap.Bootstrap;
 using TapTap.Common;
 using TapTap.Login;
@@ -56,7 +55,7 @@ namespace SDK.PC{
                     .ClientToken(tapCfg.clientToken) // 必须，开发者中心对应 Client Token
                     .ServerURL(tapCfg.serverUrl) // 开发者中心 > 你的游戏 > 游戏服务 > 云服务 > 数据存储 > 服务设置 > 自定义域名 绑定域名
                     .RegionType(RegionType.IO) // 非必须，默认 CN 表示国内
-                    .TapDBConfig(tapCfg.enableTapDB, tapCfg.tapDBChannel, PlayerSettings.bundleVersion)
+                    .TapDBConfig(tapCfg.enableTapDB, tapCfg.tapDBChannel, Application.version)
                     .ConfigBuilder();
                 TapBootstrap.Init(config);
 

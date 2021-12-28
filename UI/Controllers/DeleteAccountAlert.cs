@@ -21,10 +21,11 @@ public class DeleteAccountAlert : UIElement{
     public Button sureTwo;
 
     private LoginType loginType = LoginType.Guest;
-    private LanguageModel langMd = LanguageMg.GetCurrentModel();
+    private LanguageModel langMd;
     private bool inputError = false;
 
     void Start(){
+        langMd = LanguageMg.GetCurrentModel();
         loginType = (LoginType) SafeDictionary.GetValue<int>(extra, "loginType");
         if (loginType == LoginType.Guest){ //删除游客
             titleOne.text = langMd.tds_delete_account_title;

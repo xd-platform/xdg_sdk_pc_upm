@@ -150,13 +150,23 @@ namespace SDK.PC{
                     }
                     if (hasIOS || hasAndroid){
                         var param = new Dictionary<string, object>(){
-                            {"hasIOS",hasIOS ?  1 : 0},
-                            {"hasAndroid",hasAndroid ? 1 : 0},
+                            {"hasIOS",hasIOS },
+                            {"hasAndroid",hasAndroid},
                         };
                         UIManager.ShowUI<PayHintAlert>(param, null);   
                     }
                 }
             });
+        }
+
+        public static void OpenWebPay(string serverId, string roleId){
+            var url = Net.GetPayUrl(serverId, roleId);
+            if (string.IsNullOrEmpty(url)){
+                XDGSDK.Log("请先登录游戏");
+            } else{
+                XDGSDK.Log("支付 pay URL: " + url);
+                Application.OpenURL(new WWW(url).url);
+            }
         }
     }
 }
