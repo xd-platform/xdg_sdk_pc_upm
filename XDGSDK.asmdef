@@ -1,5 +1,8 @@
 {
   "name": "XDGSDK",
+  "references": [
+    "Unity.TextMeshPro"
+  ],
   "includePlatforms": [
     "Editor",
     "macOSStandalone",

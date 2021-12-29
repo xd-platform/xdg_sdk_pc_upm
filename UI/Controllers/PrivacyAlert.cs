@@ -1,20 +1,18 @@
-﻿using System.Collections;
-using SDK.PC;
+﻿using SDK.PC;
 using UnityEngine;
 using UnityEngine.UI;
-// using ZenFulcrum.EmbeddedBrowser;
+using TMPro;
 
 public class PrivacyAlert : UIElement{
     public Text titleText;
-
-    // public Browser leftWeb;
-    // public Browser rightWeb;
-
+    
     public Button leftCheckButton;
     public Button leftCheckTextBt;
+    public TMP_Text leftText;
 
     public Button rightCheckButton;
     public Button rightCheckTextBt;
+    public TMP_Text rightText;
 
     public Button centerCheckButton;
     public Button centerCheckTextBt;
@@ -28,12 +26,21 @@ public class PrivacyAlert : UIElement{
     private bool centerSelected = false;
     private string centerStr = null; //为空则不显示
 
+    private TextMesh a;
+
     void Start(){
         cfgModel = InitConfigModel.GetLocalModel();
         langModel = LanguageMg.GetCurrentModel();
 
         // leftWeb.Url = cfgModel.data.configs.serviceTermsUrl;
         // rightWeb.Url = cfgModel.data.configs.serviceAgreementUrl;
+        
+        Net.GetRequest("https://protocol.xd.com/agreement.txt", (data) => {
+            leftText.text = data;
+            rightText.text = data;
+        }, (code, msg) => {
+            
+        });
 
         RefreshLanguage();
     }
