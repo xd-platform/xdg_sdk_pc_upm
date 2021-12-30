@@ -72,6 +72,10 @@ namespace SDK.PC{
                 mg.toastBt.transform.SetSiblingIndex(0);
                 mg.toastBt.gameObject.SetActive(false);
             }
+
+            if (mg.uiElements.Count == 0){
+               DismissAll();   
+            }
         }
 
         public static void ShowLoading(){

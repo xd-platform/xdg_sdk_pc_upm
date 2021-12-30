@@ -31,17 +31,13 @@ public class PrivacyAlert : UIElement{
     void Start(){
         cfgModel = InitConfigModel.GetLocalModel();
         langModel = LanguageMg.GetCurrentModel();
-
-        // leftWeb.Url = cfgModel.data.configs.serviceTermsUrl;
-        // rightWeb.Url = cfgModel.data.configs.serviceAgreementUrl;
         
-        Net.GetRequest("https://protocol.xd.com/agreement.txt", (data) => {
-            leftText.text = data;
-            rightText.text = data;
-        }, (code, msg) => {
-            
+        cfgModel.GetPrivacyTxt(cfgModel.data.configs.serviceAgreementTxt, (txt) => {
+            leftText.text = txt;
         });
-
+        cfgModel.GetPrivacyTxt(cfgModel.data.configs.serviceTermsTxt, (txt) => {
+            rightText.text = txt;
+        });
         RefreshLanguage();
     }
 

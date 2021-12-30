@@ -29,12 +29,12 @@ public class AccountCell : UIElement{
 
     private void Start(){
         if (cellModel != null){
-            nameText.text = cellModel.loginName;
+            nameText.text = langMd.tds_account_format.Replace("%s", cellModel.loginName);
             if (cellModel.loginType == (int) LoginType.TapTap){
                 iconImage.sprite = Resources.Load("Images/type_icon_tap", typeof(Sprite)) as Sprite;
             }
             
-            if (cellModel.status == 1){ //已绑定
+            if (cellModel.status == (int)BindType.Bind){ 
                 bindBt.transform.Find("Text").GetComponent<Text>().text = langMd.tds_unbind;
                 bindBt.transform.Find("Text").GetComponent<Text>().color = new Color(0.6f, 0.6f, 0.6f, 1f);
                 arrowImage.sprite = Resources.Load("Images/arrow_gray", typeof(Sprite)) as Sprite;

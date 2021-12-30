@@ -89,7 +89,8 @@ namespace SDK.PC{
             UnityWebRequest w = UnityWebRequest.Post(finalUrl,"");
             w.uploadHandler = new UploadHandlerRaw(formData); 
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
-            w.timeout = 15;
+            w.SetRequestHeader("Accept-Language", LanguageMg.GetLanguageKey());
+            w.timeout = 30;
             
             var auth = GetMacToken(finalUrl, "POST");
             if (!string.IsNullOrEmpty(auth)){
@@ -106,17 +107,14 @@ namespace SDK.PC{
             yield return w.SendWebRequest();
 
             if (!string.IsNullOrEmpty(w.error)){
-                if (w.downloadHandler != null){
-                    XDGSDK.LogError(finalUrl + "\n\n" + w.downloadHandler.text);
-                }
-                
+                XDGSDK.Log("数据失败：\n" + finalUrl + "\n\n" + w.downloadHandler.text);
                 string data = w.downloadHandler.text;
-                if (data != null){
-                    methodForError(GetResponseCode(w), data);
+                if (!string.IsNullOrEmpty(data)){
+                    var md = XDGSDK.GetModel<BaseModel>(data);
+                    methodForError(md.code, md.msg);
                 } else{
-                    methodForError(GetResponseCode(w), w.error);
+                    methodForError(-1, w.error);
                 }
-
                 w.Dispose();
                 yield break;
             } else{
@@ -127,7 +125,7 @@ namespace SDK.PC{
                     yield break;
                 } else{
                     XDGSDK.Log("请求失败，response 为空。url: " + finalUrl);
-                    methodForError(GetResponseCode(w), "Empty response from server : " + finalUrl);
+                    methodForError(-1, "Network Connect Error");
                 }
             }
         }
@@ -140,7 +138,8 @@ namespace SDK.PC{
             
             UnityWebRequest w = UnityWebRequest.Get(finalUrl);
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
-            w.timeout = 15;
+            w.SetRequestHeader("Accept-Language", LanguageMg.GetLanguageKey());
+            w.timeout = 30;
 
             var auth = GetMacToken(finalUrl, "GET");
             if (!string.IsNullOrEmpty(auth)){
@@ -150,10 +149,15 @@ namespace SDK.PC{
             yield return w.SendWebRequest();
 
             if (!string.IsNullOrEmpty(w.error)){
-                if (w.downloadHandler != null){
-                    XDGSDK.LogError(finalUrl + "\n\n" +  w.downloadHandler.text);
+                XDGSDK.Log("数据失败：\n" + finalUrl + "\n\n" + w.downloadHandler.text);
+                string data = w.downloadHandler.text;
+                if (!string.IsNullOrEmpty(data)){
+                    var md = XDGSDK.GetModel<BaseModel>(data);
+                    methodForError(md.code, md.msg);
+                } else{
+                    methodForError(-1, w.error);
                 }
-                methodForError(GetResponseCode(w), w.error);
+                
                 w.Dispose();
                 yield break;
             } else{
@@ -164,24 +168,9 @@ namespace SDK.PC{
                     yield break;
                 } else{
                     XDGSDK.Log("请求失败，response 为空。url: " + finalUrl);
-                    methodForError(GetResponseCode(w), "Empty response from server : " + finalUrl);
+                    methodForError(-1, "Network Connect Error");
                 }
             }
-        }
-
-        private static int GetResponseCode(UnityWebRequest request){
-            int ret = 0;
-            if (request.GetResponseHeaders() == null){
-                XDGSDK.LogError("no response headers.");
-            } else{
-                if (!request.GetResponseHeaders().ContainsKey("STATUS")){
-                    XDGSDK.LogError("response headers has no STATUS.");
-                } else{
-                    ret = ParseResponseCode(request.GetResponseHeaders()["STATUS"]);
-                }
-            }
-
-            return ret;
         }
 
         private static int ParseResponseCode(string statusLine){

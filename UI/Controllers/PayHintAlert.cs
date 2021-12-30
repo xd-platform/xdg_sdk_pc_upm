@@ -22,7 +22,7 @@ public class PayHintAlert : UIElement{
         var hasIOS = SafeDictionary.GetValue<bool>(extra, "hasIOS");
         var hasAndroid = SafeDictionary.GetValue<bool>(extra, "hasAndroid");
         if (hasIOS  && hasAndroid ){
-            mstTxt.text = langMd.tds_refund_ios_pay_tip; //待修改
+            mstTxt.text = langMd.tds_refund_all_pay_tip; 
         }else if (hasIOS){
             mstTxt.text = langMd.tds_refund_ios_pay_tip;
         } else{

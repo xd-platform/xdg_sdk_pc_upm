@@ -65,6 +65,7 @@ namespace SDK.PC{
         public string tds_promotion_exchange_title { get; set; }
         public string tds_promotion_exchange_desc { get; set; }
         public string tds_refund_android_pay_tip { get; set; }
+        public string tds_refund_all_pay_tip { get; set; }
         public string tds_pay_net_fail { get; set; }
         public string tds_refund_net_fail { get; set; }
         public string tds_purchase_processing { get; set; }

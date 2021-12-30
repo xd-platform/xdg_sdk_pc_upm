@@ -1,6 +1,5 @@
+using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
-
 
 namespace SDK.PC{
     public class InitConfigModel : BaseModel{
@@ -23,8 +22,10 @@ namespace SDK.PC{
         public class Configs{
             public string webPayUrl{ get; set; }
             public string serviceAgreementUrl{ get; set; }
+            public string serviceAgreementTxt{ get; set; }
             public string googlePlayGamesAndroidClientId{ get; set; }
             public string serviceTermsUrl{ get; set; }
+            public string serviceTermsTxt{ get; set; }
             public string reportUrl{ get; set; }
             public List<BindEntriesConfig> bindEntriesConfig{ get; set; }
             public List<string> androidLoginEntries{ get; set; }
@@ -54,6 +55,7 @@ namespace SDK.PC{
                 string json = XDGSDK.GetJson(model);
                 DataStorage.SaveString(DataStorage.InitConfig, json);
                 currentMd = model;
+                currentMd.SavePrivacyTxt();
             }
         }
 
@@ -89,6 +91,36 @@ namespace SDK.PC{
             if (md != null){
                 var str = $"{md.data.version}-{md.data.configs.serviceAgreementUrl}-{md.data.configs.serviceTermsUrl}";
                 DataStorage.SaveString(DataStorage.PrivacyKey, str);
+            }
+        }
+
+        private void SavePrivacyTxt(){
+            Net.GetRequest(data.configs.serviceTermsTxt, (txt) => {
+                if (!string.IsNullOrEmpty(txt)){
+                    DataStorage.SaveString(data.configs.serviceTermsTxt, txt);   
+                }
+            }, (code, msg) => {
+            });
+        
+            Net.GetRequest(data.configs.serviceAgreementTxt, (txt) => {
+                if (!string.IsNullOrEmpty(txt)){
+                    DataStorage.SaveString(data.configs.serviceAgreementTxt, txt);   
+                }
+            }, (code, msg) => {
+            });
+        }
+
+        public void GetPrivacyTxt(string txtUrl, Action<string> callback){
+            var txt = DataStorage.LoadString(txtUrl);
+            if (!string.IsNullOrEmpty(txt)){
+                callback(txt);
+            } else{
+                Net.GetRequest(txtUrl, (data) => {
+                    callback(data);
+                    DataStorage.SaveString(txtUrl, data);   
+                }, (code, msg) => {
+                    callback("");
+                });
             }
         }
 

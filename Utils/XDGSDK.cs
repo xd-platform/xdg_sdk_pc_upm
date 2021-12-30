@@ -13,14 +13,14 @@ namespace SDK.PC{
         public static bool Tmp_IsInited = false;
         public static bool Tmp_IsInitSDK_ing = false;
 
-        public static void InitSDK(string sdkClientId, Action<bool> callback){
+        public static void InitSDK(string sdkClientId, Action<bool, string> callback){
             if (Tmp_IsInitSDK_ing){
                 XDGSDK.Log("正在初始化中...");
                 return;
             }
 
             if (Tmp_IsInited){
-                callback(true);
+                callback(true, "");
                 XDGSDK.Log("已经初始化过了");
                 return;
             }
@@ -31,37 +31,37 @@ namespace SDK.PC{
                 if (success){
                     Api.InitSDK(sdkClientId, callback);
                 } else{
-                    callback(false);
+                    callback(false,"Get IP Info Error");
                     Tmp_IsInitSDK_ing = false;
                 }
             });
         }
 
-        public static void LoginTyType(LoginType loginType, Action<bool, XDGUserModel> callback){
+        public static void LoginTyType(LoginType loginType, Action<bool, XDGUserModel, string> callback){
             if (!IsInited()){
                 XDGSDK.Log("请先初始化！");
-                callback(false, null);
+                callback(false, null, "Please init first");
                 return;
             }
             var md = XDGUserModel.GetLocalModel();
             if (md != null){
                 XDGSDK.Log("已经登录了");
-                callback(true, md);
+                callback(true, md, "");
                 return;
             }
             Api.LoginTyType(loginType, callback);
         }
 
-        public static void GetUserInfo(Action<bool, XDGUserModel> callback){
+        public static void GetUserInfo(Action<bool, XDGUserModel, string> callback){
             if (!IsInited()){
                 XDGSDK.Log("请先初始化！");
-                callback(false, null);
+                callback(false, null, "Please init first");
                 return;
             }
 
             if (TokenModel.GetLocalModel() == null){
                 XDGSDK.Log("请先登录！");
-                callback(false, null);
+                callback(false, null, "Please login first");
                 return;
             }
 
@@ -111,6 +111,56 @@ namespace SDK.PC{
             LanguageMg.SetLanguageType(type);
         }
 
+        public static void CheckPay(Action<CheckPayType, string> callback){
+            Api.checkPay((success, model, msg) => {
+                if (success){
+                    if (model.data.list != null && model.data.list.Count > 0){
+                        var hasIOS = false;
+                        var hasAndroid = false;
+                        foreach (var md in model.data.list){
+                            if (md.platform == 1){
+                                hasIOS = true;
+                            }
+                            if (md.platform == 2){
+                                hasAndroid = true;
+                            }
+                        }
+                        if (hasIOS || hasAndroid){
+                            var param = new Dictionary<string, object>(){
+                                {"hasIOS",hasIOS },
+                                {"hasAndroid",hasAndroid},
+                            };
+                            UIManager.ShowUI<PayHintAlert>(param, null);   
+                        }
+
+                        if (hasIOS && hasAndroid){
+                            callback(CheckPayType.All, "iOS,Android 都需要补款");
+                        }else if (hasIOS){
+                            callback(CheckPayType.iOS, "iOS 需要补款");
+                        }else if (hasAndroid){
+                            callback(CheckPayType.Android, "Android 需要补款");
+                        } else{
+                            callback(CheckPayType.None, "没有需要补款的");
+                        }
+                    } else{
+                        callback(CheckPayType.None, "没有需要补款的");
+                    }
+                } else{
+                    callback(CheckPayType.Error, msg);
+                }
+            });
+        }
+
+        public static void OpenWebPay(string serverId, string roleId){
+            var url = Net.GetPayUrl(serverId, roleId);
+            if (string.IsNullOrEmpty(url)){
+                XDGSDK.Log("请先登录游戏");
+            } else{
+                XDGSDK.Log("支付 pay URL: " + url);
+                Application.OpenURL(new WWW(url).url);
+            }
+        }
+        
         public static void Log(string msg){
             Debug.Log("-------------SDK 打印-------------\n" + msg + "\n\n");
         }
@@ -133,40 +183,6 @@ namespace SDK.PC{
             }
 
             return JsonConvert.SerializeObject(model);
-        }
-
-        public static void CheckPay(){
-            Api.checkPay((success, model) => {
-                if (success && model.data.list != null && model.data.list.Count > 0){
-                    var hasIOS = false;
-                    var hasAndroid = false;
-                    foreach (var md in model.data.list){
-                        if (md.platform == 1){
-                            hasIOS = true;
-                        }
-                        if (md.platform == 2){
-                            hasAndroid = true;
-                        }
-                    }
-                    if (hasIOS || hasAndroid){
-                        var param = new Dictionary<string, object>(){
-                            {"hasIOS",hasIOS },
-                            {"hasAndroid",hasAndroid},
-                        };
-                        UIManager.ShowUI<PayHintAlert>(param, null);   
-                    }
-                }
-            });
-        }
-
-        public static void OpenWebPay(string serverId, string roleId){
-            var url = Net.GetPayUrl(serverId, roleId);
-            if (string.IsNullOrEmpty(url)){
-                XDGSDK.Log("请先登录游戏");
-            } else{
-                XDGSDK.Log("支付 pay URL: " + url);
-                Application.OpenURL(new WWW(url).url);
-            }
         }
     }
 }
