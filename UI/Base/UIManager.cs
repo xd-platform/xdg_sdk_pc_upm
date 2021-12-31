@@ -79,9 +79,11 @@ namespace SDK.PC{
         }
 
         public static void ShowLoading(){
+            ShowUI<LoadingView>(null, null);
         }
-
+        
         public static void DismissLoading(){
+            DismissAll();
         }
 
         private static UIManager Instance(){
