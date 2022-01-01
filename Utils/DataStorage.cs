@@ -6,7 +6,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.IO;
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public static class DataStorage{
 
         public static readonly string InitConfig = "XD_InitConfigKey";

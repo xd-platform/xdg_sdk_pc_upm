@@ -1,4 +1,4 @@
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class SyncTokenModel : BaseModel{
         public Data data{ get; set; }
 

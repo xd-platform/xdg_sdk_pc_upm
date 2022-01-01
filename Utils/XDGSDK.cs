@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using TapTap.Bootstrap;
 using UnityEngine.Networking;
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class XDGSDK{
         private readonly static string VERSION = "6.0.0";
         public static bool Tmp_IsInited = false;

@@ -1,4 +1,4 @@
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class LanguageModel : BaseModel{
         public string tds_account_safe_info { get; set; }
         public string tds_account_info { get; set; }

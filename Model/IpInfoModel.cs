@@ -1,4 +1,4 @@
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class IpInfoModel : BaseModel{
         public string city { get; set; }
         public string country { get; set; }

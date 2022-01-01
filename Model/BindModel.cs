@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class BindModel : BaseModel{
         public List<Data> data{ get; set; }
         

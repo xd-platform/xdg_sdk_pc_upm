@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class ContainerWindow : UIElement{
         void Awake(){
             transitionDurationTime = 0.1f;

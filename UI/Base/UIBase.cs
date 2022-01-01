@@ -2,7 +2,7 @@
 using System.Collections;
 
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class UIBase : MonoBehaviour{
         public virtual void OnEnter(){
         }

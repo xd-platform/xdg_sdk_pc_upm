@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class InitConfigModel : BaseModel{
         public Data data{ get; set; }
 

@@ -1,4 +1,4 @@
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public enum LanguageType{
         CN = 0,
         TW = 1,

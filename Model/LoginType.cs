@@ -1,4 +1,4 @@
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public enum LoginType : int{ //值要与后台一致，如下
         Guest  = 0,
         TapTap = 5,

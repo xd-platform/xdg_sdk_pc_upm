@@ -9,7 +9,7 @@ using UnityEditor;
 using UnityEngine.Networking;
 using Random = System.Random;
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     [DisallowMultipleComponent]
     public class Net : MonoBehaviour{
         private static GameObject netObject;

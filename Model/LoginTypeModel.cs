@@ -1,4 +1,4 @@
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class LoginTypeModel{
         public string typeName{ get; set; }
         public int typeValue{ get; set; }

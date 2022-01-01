@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class PayCheckModel : BaseModel{
         public Data data{ get; set; }
 

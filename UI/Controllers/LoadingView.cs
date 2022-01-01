@@ -1,4 +1,4 @@
-using SDK.PC;
+using com.xd.intl.pc;
 using UnityEngine;
 using UnityEngine.UI;
 

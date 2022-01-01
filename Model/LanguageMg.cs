@@ -3,9 +3,9 @@ using System.IO;
 using Newtonsoft.Json;
 using TapTap.Common;
 using UnityEngine;
-using Json = SDK.PC.MiniJSON.Json;
+using Json = com.xd.intl.pc.MiniJSON.Json;
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class LanguageMg{
         private static LanguageType anguageType = LanguageType.CN;
         private static string totalJson = null;
@@ -105,7 +105,7 @@ namespace SDK.PC{
 
         private static string GetJsonPath(){
             var parentFolder = Directory.GetParent(Application.dataPath)?.FullName;
-            var jsonPath = FilterFile(parentFolder + "/Library/PackageCache/", "com.xd.sdk.pc@");
+            var jsonPath = FilterFile(parentFolder + "/Library/PackageCache/", "com.xd.intl.pc@");
             if (string.IsNullOrEmpty(jsonPath)){
                 jsonPath = parentFolder + "/Assets/XDGSDK";
             }

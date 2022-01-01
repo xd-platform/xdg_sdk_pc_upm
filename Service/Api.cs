@@ -6,7 +6,7 @@ using TapTap.Login;
 using UnityEditor;
 using UnityEngine;
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     public class Api{
         private readonly static string BASE_URL = "http://test-xdsdk-intnl-6.xd.com"; //测试
         // private readonly static string BASE_URL = " https://xdsdk-intnl-6.xd.com"; //正式

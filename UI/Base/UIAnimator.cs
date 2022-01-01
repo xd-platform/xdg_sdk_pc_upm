@@ -3,7 +3,7 @@ using System.Collections;
 using System;
 
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     [DisallowMultipleComponent]
     public class UIAnimator : MonoBehaviour{
         public void DoExitAnimation(UIElement exit, UIElement resume, Action onAnimationEnd = null){

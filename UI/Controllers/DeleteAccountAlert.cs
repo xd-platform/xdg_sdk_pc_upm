@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using SDK.PC;
+using com.xd.intl.pc;
 using TapTap.Common;
 using UnityEngine;
 using UnityEngine.UI;

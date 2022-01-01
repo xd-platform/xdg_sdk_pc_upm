@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-namespace SDK.PC{
+namespace com.xd.intl.pc{
     [DisallowMultipleComponent]
     public class UIManager : MonoBehaviour{
         public static readonly int RESULT_FAILED = -1;

@@ -33,7 +33,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace SDK.PC.MiniJSON{
+namespace com.xd.intl.pc.MiniJSON{
     // Example usage:
     //
     //  using UnityEngine;
