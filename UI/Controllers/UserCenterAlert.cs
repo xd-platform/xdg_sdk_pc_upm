@@ -130,7 +130,7 @@ public class UserCenterAlert : UIElement{
     private void bind(LoginType loginType, int cellIndex){
         XDGSDK.Log("绑定： " + loginType);
         if (loginType == LoginType.TapTap){
-            Api.GetLoginParam(loginType, (success,param) => {
+            Api.GetLoginParam(loginType, (success,param,tMsg) => {
                 if (param != null){
                     Api.bind(param, (success,msg) => {
                         if (success){

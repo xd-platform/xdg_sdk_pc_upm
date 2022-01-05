@@ -75,7 +75,7 @@ namespace com.xd.intl.pc{
         }
 
         public static void LoginTyType(LoginType loginType, Action<bool, XDGUserModel, string> callback){
-            GetLoginParam(loginType, (pSuccess,param) => {
+            GetLoginParam(loginType, (pSuccess,param,tMsg) => {
                 if (param != null){
                     Net.PostRequest(XDG_COMMON_LOGIN, param, (data) => {
                         var model = XDGSDK.GetModel<TokenModel>(data);
@@ -106,47 +106,50 @@ namespace com.xd.intl.pc{
                         callback(false, null, msg);
                     });
                 } else{
-                    callback(false, null, "Login param is null");
+                    callback(false, null, tMsg);
                 }
             });
         }
 
-        public static void GetLoginParam(LoginType loginType, Action<bool,Dictionary<string, object>> callback){
+        public static void GetLoginParam(LoginType loginType, Action<bool,Dictionary<string, object>, string> callback){
             if (loginType == LoginType.Guest){
                 Dictionary<string, object> param = new Dictionary<string, object>{
                     {"type", (int) loginType},
                     {"token", SystemInfo.deviceUniqueIdentifier}
                 };
-                callback(true, param);
+                callback(true, param, "");
             } else if (loginType == LoginType.TapTap){
-                GetTapToken((success, md) => {
+                GetTapToken((success, md,tMsg) => {
                     if (success){
                         Dictionary<string, object> param = new Dictionary<string, object>{
                             {"type", (int) loginType},
                             {"token", md.kid},
                             {"secret", md.macKey},
                         };
-                        callback(true, param);
+                        callback(true, param, "");
                     } else{
-                        callback(false, null);
+                        callback(false, null, tMsg);
                     }
                 });
             }
         }
 
-        private async static void GetTapToken(Action<bool, AccessToken> callback){
+        private async static void GetTapToken(Action<bool, AccessToken, string> callback){
             try{
                 var accessToken = await TapLogin.Login();
-                callback(true, accessToken);
+                callback(true, accessToken, "");
             } catch (Exception e){
-                callback(false, null);
+                var msg = "登录失败";
                 if (e is TapException tapError){
                     if (tapError.code == (int) TapErrorCode.ERROR_CODE_BIND_CANCEL){
                         XDGSDK.Log("Tap 登录取消");
+                        msg = "登录取消";
                     } else{
-                        XDGSDK.Log($"Tap 登录失败: code: {tapError.code},  message: {tapError.message}");
+                        msg = $"Tap 登录失败: code: {tapError.code},  message: {tapError.message}";
+                        XDGSDK.Log(msg);
                     }
                 }
+                callback(false, null, msg);
             }
         }
 
