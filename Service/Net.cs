@@ -328,12 +328,15 @@ namespace com.xd.intl.pc{
                 appId = "1001001";
             }
 
+            var lang = LanguageMg.GetLanguageKey();
+            lang = lang.Replace("_", "-");
+
             Dictionary<string, string> param = new Dictionary<string, string>{
                 {"serverId", serverId},
                 {"roleId", roleId},
                 {"region", cfgMd.data.configs.region},
                 {"appId",  appId},
-                {"lang", Application.systemLanguage.ToString()},
+                {"lang", lang},
             };
             return url + "?" + DictToQueryString2(param);
         }
