@@ -323,11 +323,16 @@ namespace com.xd.intl.pc{
 
             var uri = new Uri(cfgMd.data.configs.webPayUrl);
             var url = $"{uri.Scheme}://{uri.Host}";
+            var appId = cfgMd.data.configs.appId;
+            if ("1111".Equals(appId)){ //demo没有对应的支付网页，用FP的ID 
+                appId = "1001001";
+            }
+
             Dictionary<string, string> param = new Dictionary<string, string>{
                 {"serverId", serverId},
                 {"roleId", roleId},
                 {"region", cfgMd.data.configs.region},
-                {"appId",  cfgMd.data.configs.appId},
+                {"appId",  appId},
                 {"lang", Application.systemLanguage.ToString()},
             };
             return url + "?" + DictToQueryString2(param);
