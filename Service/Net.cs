@@ -79,19 +79,18 @@ namespace com.xd.intl.pc{
 
         private IEnumerator Post(string url, Dictionary<string, string> headers, Dictionary<string, object> parameters,
             Action<string> methodForResult, Action<int, string> methodForError){
-            
-            string finalUrl  = url + "?" + DictToQueryString2(GetCommonParam(url));
+            string finalUrl = url + "?" + DictToQueryString2(GetCommonParam(url));
             Dictionary<string, object> finalParameter = parameters ?? new Dictionary<string, object>();
-            
+
             String jsonString = MiniJSON.Json.Serialize(finalParameter);
             Byte[] formData = Encoding.UTF8.GetBytes(jsonString);
-            
-            UnityWebRequest w = UnityWebRequest.Post(finalUrl,"");
-            w.uploadHandler = new UploadHandlerRaw(formData); 
+
+            UnityWebRequest w = UnityWebRequest.Post(finalUrl, "");
+            w.uploadHandler = new UploadHandlerRaw(formData);
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.SetRequestHeader("Accept-Language", LanguageMg.GetLanguageKey());
             w.timeout = 30;
-            
+
             var auth = GetMacToken(finalUrl, "POST");
             if (!string.IsNullOrEmpty(auth)){
                 w.SetRequestHeader("Authorization", auth);
@@ -103,7 +102,7 @@ namespace com.xd.intl.pc{
                     w.SetRequestHeader(headerKey, headers[headerKey]);
                 }
             }
-            
+
             yield return w.SendWebRequest();
 
             if (!string.IsNullOrEmpty(w.error)){
@@ -113,19 +112,23 @@ namespace com.xd.intl.pc{
                     var md = XDGSDK.GetModel<BaseModel>(data);
                     methodForError(md.code, md.msg);
                 } else{
-                    methodForError(-1, w.error);
+                    var lmd = LanguageMg.GetCurrentModel();
+                    var str = (lmd == null ? "Network Error" : lmd.tds_network_error_safe_retry);
+                    methodForError(-1, str);
                 }
                 w.Dispose();
                 yield break;
             } else{
                 string data = w.downloadHandler.text;
                 if (data != null){
-                    XDGSDK.Log("发起Post请求：" + finalUrl + "\n\nbody参数：" + jsonString +  "\n\n响应结果：" + data);
+                    XDGSDK.Log("发起Post请求：" + finalUrl + "\n\nbody参数：" + jsonString + "\n\n响应结果：" + data);
                     methodForResult(data);
                     yield break;
                 } else{
                     XDGSDK.Log("请求失败，response 为空。url: " + finalUrl);
-                    methodForError(-1, "Network Connect Error");
+                    var lmd = LanguageMg.GetCurrentModel();
+                    var str = (lmd == null ? "Network Error" : lmd.tds_network_error_safe_retry);
+                    methodForError(-1, str);
                 }
             }
         }
@@ -133,9 +136,8 @@ namespace com.xd.intl.pc{
         private IEnumerator Get(string url, Dictionary<string, object> parameters,
             Action<string> methodForResult,
             Action<int, string> methodForError){
-
             string finalUrl = url + "?" + DictToQueryString(parameters) + DictToQueryString2(GetCommonParam(url));
-            
+
             UnityWebRequest w = UnityWebRequest.Get(finalUrl);
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.SetRequestHeader("Accept-Language", LanguageMg.GetLanguageKey());
@@ -155,9 +157,10 @@ namespace com.xd.intl.pc{
                     var md = XDGSDK.GetModel<BaseModel>(data);
                     methodForError(md.code, md.msg);
                 } else{
-                    methodForError(-1, w.error);
+                    var lmd = LanguageMg.GetCurrentModel();
+                    var str = (lmd == null ? "Network Error" : lmd.tds_network_error_safe_retry);
+                    methodForError(-1, str);
                 }
-                
                 w.Dispose();
                 yield break;
             } else{
@@ -168,7 +171,9 @@ namespace com.xd.intl.pc{
                     yield break;
                 } else{
                     XDGSDK.Log("请求失败，response 为空。url: " + finalUrl);
-                    methodForError(-1, "Network Connect Error");
+                    var lmd = LanguageMg.GetCurrentModel();
+                    var str = (lmd == null ? "Network Error" : lmd.tds_network_error_safe_retry);
+                    methodForError(-1, str);
                 }
             }
         }
@@ -192,10 +197,12 @@ namespace com.xd.intl.pc{
             if (dict == null){
                 return "";
             }
+
             List<string> list = new List<string>();
             foreach (var item in dict){
                 list.Add(item.Key + "=" + item.Value);
             }
+
             return string.Join("&", list.ToArray());
         }
 
@@ -203,10 +210,12 @@ namespace com.xd.intl.pc{
             if (dict == null){
                 return "";
             }
+
             List<string> list = new List<string>();
             foreach (var item in dict){
                 list.Add(item.Key + "=" + item.Value);
             }
+
             return string.Join("&", list.ToArray());
         }
 
@@ -313,7 +322,7 @@ namespace com.xd.intl.pc{
             };
             return url + "?" + DictToQueryString2(param);
         }
-        
+
         public static string GetPayUrl(string serverId, string roleId){
             var userMd = XDGUserModel.GetLocalModel();
             var cfgMd = InitConfigModel.GetLocalModel();
@@ -335,7 +344,7 @@ namespace com.xd.intl.pc{
                 {"serverId", serverId},
                 {"roleId", roleId},
                 {"region", cfgMd.data.configs.region},
-                {"appId",  appId},
+                {"appId", appId},
                 {"lang", lang},
             };
             return url + "?" + DictToQueryString2(param);
@@ -347,7 +356,7 @@ namespace com.xd.intl.pc{
             os = "macOS";
 #endif
 #if UNITY_STANDALONE_WIN
-               os = "Windows";
+            os = "Windows";
 #endif
             return os;
         }
