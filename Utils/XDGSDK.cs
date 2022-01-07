@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
-using TapTap.Common;
 using TapTap.Login;
 using UnityEngine;
 using Newtonsoft.Json;
-using TapTap.Bootstrap;
-using UnityEngine.Networking;
 
 namespace com.xd.intl.pc{
     public class XDGSDK{

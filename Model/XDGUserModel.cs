@@ -21,7 +21,7 @@ namespace com.xd.intl.pc{
             public LoginType GetLoginType(){
                 if (this.loginType == 0){
                     return LoginType.Guest;
-                } else if (this.loginType == 1){
+                } else if (this.loginType == 5){
                     return LoginType.TapTap;
                 }
                 return LoginType.Guest;
