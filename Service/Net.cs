@@ -89,7 +89,7 @@ namespace com.xd.intl.pc{
             w.uploadHandler = new UploadHandlerRaw(formData);
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.SetRequestHeader("Accept-Language", LanguageMg.GetLanguageKey());
-            w.timeout = 30;
+            w.timeout = 6;
 
             var auth = GetMacToken(finalUrl, "POST");
             if (!string.IsNullOrEmpty(auth)){
@@ -141,7 +141,7 @@ namespace com.xd.intl.pc{
             UnityWebRequest w = UnityWebRequest.Get(finalUrl);
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.SetRequestHeader("Accept-Language", LanguageMg.GetLanguageKey());
-            w.timeout = 30;
+            w.timeout = 6;
 
             var auth = GetMacToken(finalUrl, "GET");
             if (!string.IsNullOrEmpty(auth)){

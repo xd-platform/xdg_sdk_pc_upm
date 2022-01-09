@@ -81,7 +81,8 @@ namespace com.xd.intl.pc{
                         errorView.SetActive(false);
                     } else{
                         errorView.SetActive(true);
-                        XDGSDK.Log("列表请求失败");
+                        UIManager.ShowToast(msg);
+                        XDGSDK.Log("列表请求失败" + msg);
                     }
                 });
             }
@@ -217,6 +218,7 @@ namespace com.xd.intl.pc{
         }
 
         public void errorViewTap(){
+            XDGSDK.Log("点击了");
             requestList();
         }
     }
