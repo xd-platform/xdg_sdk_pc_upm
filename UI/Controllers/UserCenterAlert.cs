@@ -2,6 +2,8 @@
 using com.xd.intl.pc;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
+using Image = UnityEngine.UI.Image;
 
 
 namespace com.xd.intl.pc{
@@ -11,6 +13,8 @@ namespace com.xd.intl.pc{
         public Text typeTxt;
         public Text idTxt;
         public GameObject errorView;
+        public GameObject loadingView;
+        public GameObject scrollView;
 
         private LanguageModel langModel;
         private XDGUserModel userMd;
@@ -29,8 +33,7 @@ namespace com.xd.intl.pc{
             infoTitleTxt.text = langModel.tds_account_info;
             typeTxt.text = $"{langModel.tds_current_account_prefix} ({GetLoginTypeName()})";
             idTxt.text = $"ID: {userMd.data.userId}";
-            errorView.GetComponentInChildren<Text>().text = langModel.tds_loading_error_retry;
-
+            errorView.GetComponentInChildren<Text>().text = langModel.tds_network_error_retry;
             requestList();
         }
 
@@ -56,8 +59,12 @@ namespace com.xd.intl.pc{
 
         private void requestList(){
             if (dataList == null){
+                loadingView.SetActive(true);
                 Api.GetBindList((success, bindModel, msg) => {
                     if (success){
+                        loadingView.SetActive(false);
+                        scrollView.GetComponentInChildren<Image>().color = new Color(0.95f, 0.95f, 0.95f, 1f);
+
                         dataList = new List<BindModel.Data>();
                         var supportList = GetSupportTypes();
                         foreach (var st in supportList){ //本地支持的都要显示
@@ -80,12 +87,16 @@ namespace com.xd.intl.pc{
                         addCellView();
                         errorView.SetActive(false);
                     } else{
+                        Invoke("delayDismissLoading", 0.5f);
                         errorView.SetActive(true);
-                        UIManager.ShowToast(msg);
                         XDGSDK.Log("列表请求失败" + msg);
                     }
                 });
             }
+        }
+
+        private void delayDismissLoading(){
+            loadingView.SetActive(false);
         }
 
         private void addCellView(){
@@ -105,6 +116,7 @@ namespace com.xd.intl.pc{
                     if (md.status == (int) BindType.Bind){ //开始解绑
                         var dic = new Dictionary<string, object>(){
                             {"loginType", md.loginType},
+                            {"alertType", (int)getAlertType()},
                         };
                         UIManager.ShowUI<DeleteAccountAlert>(dic,
                             (code, data) => { unbind((LoginType) md.loginType, cellIndex); });
@@ -176,7 +188,6 @@ namespace com.xd.intl.pc{
                             UIManager.ShowToast(langModel.tds_unbind_delete_success_return_sign);
                             XDGSDK.Logout();
                             UIManager.DismissAll();
-
                         } else{ //不是唯一账号
                             var cellMd = dataList[cellIndex];
                             var cellView = cellList[cellIndex];
@@ -194,6 +205,21 @@ namespace com.xd.intl.pc{
                 }
             });
         }
+
+        private DeleteAlertType getAlertType(){ //解绑最后一个第三方？
+            var num = 0;
+            foreach (var md in dataList){
+                if (md.status == (int) BindType.Bind){
+                    num = num + 1;
+                }
+            }
+
+            if (num == 1){
+                return DeleteAlertType.DeleteThird;
+            }
+            return DeleteAlertType.Unbindthird;
+        }
+
 
         private List<LoginTypeModel> GetSupportTypes(){ //网络和本地支持的过滤一下
             var list = new List<LoginTypeModel>();

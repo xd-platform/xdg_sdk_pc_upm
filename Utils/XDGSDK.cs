@@ -174,7 +174,7 @@ namespace com.xd.intl.pc{
             return JsonConvert.DeserializeObject<T>(json);
         }
 
-        public static string GetJson<T>(T model) where T : BaseModel{
+        public static string GetJson<T>(T model){
             if (model == null){
                 return null;
             }

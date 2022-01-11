@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using com.xd.intl.pc;
-using TapTap.Common;
+﻿using TapTap.Common;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,13 +19,16 @@ namespace com.xd.intl.pc{
         public Button sureTwo;
 
         private LoginType loginType = LoginType.Guest;
+        private DeleteAlertType alertType = DeleteAlertType.DeleteGuest;
         private LanguageModel langMd;
         private bool inputError = false;
 
         void Start(){
             langMd = LanguageMg.GetCurrentModel();
             loginType = (LoginType) SafeDictionary.GetValue<int>(extra, "loginType");
-            if (loginType == LoginType.Guest){ //删除游客
+            alertType = (DeleteAlertType) SafeDictionary.GetValue<int>(extra, "alertType");
+            
+            if (alertType == DeleteAlertType.DeleteGuest){ //删除游客
                 titleOne.text = langMd.tds_delete_account_title;
                 msgOne.text = langMd.tds_delete_content;
                 cancelOne.transform.Find("Text").GetComponent<Text>().text = langMd.tds_cancel;
@@ -39,17 +39,31 @@ namespace com.xd.intl.pc{
                 msgTwo.text = langMd.tds_delete_confirm_content;
                 cancelTwo.transform.Find("Text").GetComponent<Text>().text = langMd.tds_cancel;
                 sureTwo.transform.Find("Text").GetComponent<Text>().text = langMd.tds_delete_account;
-            } else{ //解绑第三方
+                
+            } else if (alertType == DeleteAlertType.Unbindthird){ //解绑第三方
                 titleOne.text = langMd.tds_unbind_account_title;
                 msgOne.text = langMd.tds_unbind_content.Replace("%s", new LoginTypeModel(loginType).typeName);
                 cancelOne.transform.Find("Text").GetComponent<Text>().text = langMd.tds_cancel;
-                sureOne.transform.Find("Text").GetComponent<Text>().text = langMd.tds_unbind_account_button;
+                sureOne.transform.Find("Text").GetComponent<Text>().text = langMd.tds_unbind_account;
 
                 //two
                 titleTwo.text = langMd.tds_unbind_account;
                 msgTwo.text = langMd.tds_unbind_confirm_Content;
                 cancelTwo.transform.Find("Text").GetComponent<Text>().text = langMd.tds_cancel;
-                sureTwo.transform.Find("Text").GetComponent<Text>().text = langMd.tds_unbind_account;
+                sureTwo.transform.Find("Text").GetComponent<Text>().text = langMd.tds_unbind_account_button;
+                
+            } else{ //删除第三方
+                titleOne.text = langMd.tds_delete_account_title;
+                msgOne.text = langMd.tds_unbind_delete_content.Replace("%s", new LoginTypeModel(loginType).typeName);
+                cancelOne.transform.Find("Text").GetComponent<Text>().text = langMd.tds_cancel;
+                sureOne.transform.Find("Text").GetComponent<Text>().text = langMd.tds_delete_account_sure;
+
+                //two
+                titleTwo.text = langMd.tds_delete_account;
+                msgTwo.text = langMd.tds_delete_confirm_content;
+                cancelTwo.transform.Find("Text").GetComponent<Text>().text = langMd.tds_cancel;
+                sureTwo.transform.Find("Text").GetComponent<Text>().text = langMd.tds_delete_account;
+                
             }
 
             fieldTwo.onValueChanged.AddListener((param) => { OnInputFieldChange(param); });
@@ -79,7 +93,7 @@ namespace com.xd.intl.pc{
 
         public void sureTwoTap(){
             var str = fieldTwo.text;
-            if (loginType == LoginType.Guest){
+            if (alertType == DeleteAlertType.DeleteGuest || alertType == DeleteAlertType.DeleteThird){ //删除游客或第三方
                 if (!"Delete".Equals(str)){
                     hintTxt.text = langMd.tds_input_error;
                     fieldTwo.GetComponent<Image>().sprite =
@@ -102,4 +116,11 @@ namespace com.xd.intl.pc{
             }
         }
     }
+
+    public enum DeleteAlertType : int{ 
+        DeleteGuest = 0,   //删除游客
+        DeleteThird = 1,   //删除第三方
+        Unbindthird = 2,   //解绑第三方
+    }
+
 }

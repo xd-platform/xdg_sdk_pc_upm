@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using TapTap.Common;
+using UnityEngine;
 
 namespace com.xd.intl.pc{
     public class InitConfigModel : BaseModel{
@@ -11,12 +14,31 @@ namespace com.xd.intl.pc{
             public int canUnbind{ get; set; }
         }
 
-        public class TapSdkConfig{
+        public class TapSdkConfig : BaseModel{
             public string clientId{ get; set; }
             public string tapDBChannel{ get; set; }
             public string clientToken{ get; set; }
             public string serverUrl{ get; set; }
             public bool enableTapDB{ get; set; }
+            
+            public static TapSdkConfig ReadLocalTapConfig(){
+                var parentFolder = Directory.GetParent(Application.dataPath)?.FullName;
+                var jsonPath  = parentFolder + "/Assets/Plugins/XD-Info.json";
+                if (!File.Exists(jsonPath)){
+                    XDGSDK.LogError("请配置：/Assets/Plugins/XD-Info.json");
+                    return null;
+                } else{
+                    var json = File.ReadAllText(jsonPath);
+                    var dic = Json.Deserialize(json) as Dictionary<string,object>;
+                    var cfg = SafeDictionary.GetValue<Dictionary<string, object>>(dic, "tapsdk");
+                    var md =  XDGSDK.GetModel<TapSdkConfig>(XDGSDK.GetJson(cfg));
+
+                    if (md == null || string.IsNullOrEmpty(md.clientId)){
+                        XDGSDK.LogError("Tap json解析失败：/Assets/Plugins/XD-Info.json");
+                    }
+                    return md;
+                }
+            }
         }
 
         public class Configs{

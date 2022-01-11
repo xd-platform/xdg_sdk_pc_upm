@@ -12,7 +12,8 @@ namespace com.xd.intl.pc{
 
         public void deleteTaped(){
             var dic = new Dictionary<string, object>(){
-                {"loginType", 0},
+                {"loginType", (int)LoginType.Guest},
+                {"alertType", (int)DeleteAlertType.DeleteGuest}, 
             };
             UIManager.ShowUI<DeleteAccountAlert>(dic, (code, msg) => { OnCallback(UIManager.RESULT_SUCCESS, "删除账号"); });
         }

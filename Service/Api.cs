@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace com.xd.intl.pc{
     public class Api{
-        private readonly static string BASE_URL = "http://test-xdsdk-intnl-6.xd.com"; //测试
+        private readonly static string BASE_URL = "https://test-xdsdk-intnl-6.xd.com"; //测试
         // private readonly static string BASE_URL = " https://xdsdk-intnl-6.xd.com"; //正式
 
         //获取配置
@@ -49,6 +49,12 @@ namespace com.xd.intl.pc{
                 var model = XDGSDK.GetModel<InitConfigModel>(data);
                 if (model.code == SUCCESS){
                     InitConfigModel.SaveToLocal(model);
+                    
+                    //网络没配置，就读本地配置
+                    if (model.data.configs.tapSdkConfig == null){
+                        model.data.configs.tapSdkConfig = InitConfigModel.TapSdkConfig.ReadLocalTapConfig();;
+                    }
+
                     var tapCfg = model.data.configs.tapSdkConfig;
                     TapLogin.Init(tapCfg.clientId, false, false);
                     var config = new TapConfig.Builder()
