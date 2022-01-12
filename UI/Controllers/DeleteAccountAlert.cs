@@ -67,6 +67,15 @@ namespace com.xd.intl.pc{
             }
 
             fieldTwo.onValueChanged.AddListener((param) => { OnInputFieldChange(param); });
+            Invoke("updatePosition", 0.1f);
+        }
+
+        private void updatePosition(){
+            var x = cancelOne.transform.GetComponent<RectTransform>().sizeDelta.x / 2;
+            sureOne.transform.localPosition = new Vector3(-x, -60f, 0);
+            
+            var x2 = 10 + sureTwo.transform.GetComponent<RectTransform>().sizeDelta.x / 2;
+            cancelTwo.transform.localPosition = new Vector3(-x2, -60f, 0);
         }
 
         private void OnInputFieldChange(string txt){

@@ -83,7 +83,9 @@ namespace com.xd.intl.pc{
         public static void LoginTyType(LoginType loginType, Action<bool, XDGUserModel, string> callback){
             GetLoginParam(loginType, (pSuccess,param,tMsg) => {
                 if (param != null){
+                    UIManager.ShowLoading();
                     Net.PostRequest(XDG_COMMON_LOGIN, param, (data) => {
+                        UIManager.DismissLoading();
                         var model = XDGSDK.GetModel<TokenModel>(data);
                         if (model.code == SUCCESS){
                             TokenModel.SaveToLocal(model);
@@ -109,6 +111,8 @@ namespace com.xd.intl.pc{
                         }
                     }, (code, msg) => {
                         XDGSDK.Log("登录失败 code: " + code + " msg: " + msg);
+                        UIManager.DismissLoading();
+                        UIManager.ShowToast(msg);
                         callback(false, null, msg);
                     });
                 } else{
