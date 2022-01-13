@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using TapTap.Bootstrap;
 using TapTap.Common;
 using TapTap.Login;
@@ -9,7 +10,7 @@ using UnityEngine;
 namespace com.xd.intl.pc{
     public class Api{
         private readonly static string BASE_URL = "https://test-xdsdk-intnl-6.xd.com"; //测试
-        // private readonly static string BASE_URL = " https://xdsdk-intnl-6.xd.com"; //正式
+        // private readonly static string BASE_URL = "https://xdsdk-intnl-6.xd.com"; //正式
 
         //获取配置
         private readonly static string INIT_SDK = BASE_URL + "/api/init/v1/config";
@@ -51,9 +52,9 @@ namespace com.xd.intl.pc{
                     InitConfigModel.SaveToLocal(model);
                     
                     //网络没配置，就读本地配置
-                    if (model.data.configs.tapSdkConfig == null){
+                    // if (model.data.configs.tapSdkConfig == null){
                         model.data.configs.tapSdkConfig = InitConfigModel.TapSdkConfig.ReadLocalTapConfig();;
-                    }
+                    // }
 
                     var tapCfg = model.data.configs.tapSdkConfig;
                     TapLogin.Init(tapCfg.clientId, false, false);
@@ -86,6 +87,7 @@ namespace com.xd.intl.pc{
                     UIManager.ShowLoading();
                     Net.PostRequest(XDG_COMMON_LOGIN, param, (data) => {
                         UIManager.DismissLoading();
+                        Thread.Sleep(TimeSpan.FromSeconds(0.2f));
                         var model = XDGSDK.GetModel<TokenModel>(data);
                         if (model.code == SUCCESS){
                             TokenModel.SaveToLocal(model);
@@ -155,8 +157,7 @@ namespace com.xd.intl.pc{
                         XDGSDK.Log("Tap 登录取消");
                         msg = "登录取消";
                     } else{
-                        msg = $"Tap 登录失败: code: {tapError.code},  message: {tapError.message}";
-                        XDGSDK.Log(msg);
+                        XDGSDK.Log($"Tap 登录失败: code: {tapError.code},  message: {tapError.message}");
                     }
                 }
                 callback(false, null, msg);
@@ -164,11 +165,11 @@ namespace com.xd.intl.pc{
         }
 
         private static void SyncTdsUser(Action<bool, string> callback){
-            Net.PostRequest(XDG_LOGIN_SYN, null, (data) => {
+            Net.PostRequest(XDG_LOGIN_SYN, null, async( data) => {
                 var md = XDGSDK.GetModel<SyncTokenModel>(data);
                 if (md.code == SUCCESS){
                     XDGSDK.Log("sync token: " + md.data.sessionToken);
-                    TDSUser.BecomeWithSessionToken(md.data.sessionToken);
+                    await TDSUser.BecomeWithSessionToken(md.data.sessionToken);
                     callback(true, "");   
                 } else{
                     callback(false, md.msg);   

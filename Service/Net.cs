@@ -107,6 +107,7 @@ namespace com.xd.intl.pc{
 
             if (!string.IsNullOrEmpty(w.error)){
                 XDGSDK.Log("数据失败：\n" + finalUrl + "\n\n" + w.downloadHandler.text);
+                XDGSDK.Log("ERROR 信息：" + w.error);
                 string data = w.downloadHandler.text;
                 if (!string.IsNullOrEmpty(data)){
                     var md = XDGSDK.GetModel<BaseModel>(data);
@@ -152,6 +153,7 @@ namespace com.xd.intl.pc{
 
             if (!string.IsNullOrEmpty(w.error)){
                 XDGSDK.Log("数据失败：\n" + finalUrl + "\n\n" + w.downloadHandler.text);
+                XDGSDK.Log("ERROR 信息：" + w.error);
                 string data = w.downloadHandler.text;
                 if (!string.IsNullOrEmpty(data)){
                     var md = XDGSDK.GetModel<BaseModel>(data);

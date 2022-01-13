@@ -146,7 +146,7 @@ namespace com.xd.intl.pc{
 
         private bool IsInNorthAmerica(){ //北美
             var str = cfgModel.data.configs.region.ToLower();
-            return "us".Equals(str);
+            return "hk".Equals(str);
         }
     }
 }
