@@ -20,24 +20,23 @@ namespace com.xd.intl.pc{
             public string clientToken{ get; set; }
             public string serverUrl{ get; set; }
             public bool enableTapDB{ get; set; }
-            
-            public static TapSdkConfig ReadLocalTapConfig(){
-                var parentFolder = Directory.GetParent(Application.dataPath)?.FullName;
-                var jsonPath  = parentFolder + "/Assets/Plugins/XD-Info.json";
-                if (!File.Exists(jsonPath)){
-                    XDGSDK.LogError("请配置：/Assets/Plugins/XD-Info.json");
-                    return null;
-                } else{
-                    var json = File.ReadAllText(jsonPath);
-                    var dic = Json.Deserialize(json) as Dictionary<string,object>;
-                    var cfg = SafeDictionary.GetValue<Dictionary<string, object>>(dic, "tapsdk");
-                    var md =  XDGSDK.GetModel<TapSdkConfig>(XDGSDK.GetJson(cfg));
 
-                    if (md == null || string.IsNullOrEmpty(md.clientId)){
-                        XDGSDK.LogError("Tap json解析失败：/Assets/Plugins/XD-Info.json");
-                    }
-                    return md;
+            public static TapSdkConfig ReadLocalTapConfig(){
+                var txtAsset = Resources.Load("XD-Info") as TextAsset;
+                TapSdkConfig md = null;
+                
+                if (txtAsset != null){
+                    var json = txtAsset.text;
+                    var dic = Json.Deserialize(json) as Dictionary<string, object>;
+                    var cfg = SafeDictionary.GetValue<Dictionary<string, object>>(dic, "tapsdk"); 
+                    md = XDGSDK.GetModel<TapSdkConfig>(XDGSDK.GetJson(cfg));   
                 }
+
+                if (md == null || string.IsNullOrEmpty(md.clientId)){
+                    XDGSDK.LogError("/Plugins/Resources/XD-Info.json  解析失败");
+                }
+
+                return md;
             }
         }
 
@@ -69,7 +68,7 @@ namespace com.xd.intl.pc{
             public string groupId{ get; set; }
             public Configs configs{ get; set; }
         }
-        
+
         private static InitConfigModel currentMd = null;
 
         public static void SaveToLocal(InitConfigModel model){
@@ -88,6 +87,7 @@ namespace com.xd.intl.pc{
                     currentMd = XDGSDK.GetModel<InitConfigModel>(json);
                 }
             }
+
             return currentMd;
         }
 
@@ -98,12 +98,14 @@ namespace com.xd.intl.pc{
                 return false;
             } else{
                 var preStr = DataStorage.LoadString(DataStorage.PrivacyKey);
-                var currentStr = $"{md.data.version}-{md.data.configs.serviceAgreementUrl}-{md.data.configs.serviceTermsUrl}";
+                var currentStr =
+                    $"{md.data.version}-{md.data.configs.serviceAgreementUrl}-{md.data.configs.serviceTermsUrl}";
                 if (string.IsNullOrEmpty(preStr)){
                     return true;
-                }else if (currentStr.Equals(preStr)){
+                } else if (currentStr.Equals(preStr)){
                     return false;
                 }
+
                 return true;
             }
         }
@@ -119,17 +121,15 @@ namespace com.xd.intl.pc{
         private void SavePrivacyTxt(){
             Net.GetRequest(data.configs.serviceTermsTxt, (txt) => {
                 if (!string.IsNullOrEmpty(txt)){
-                    DataStorage.SaveString(data.configs.serviceTermsTxt, txt);   
+                    DataStorage.SaveString(data.configs.serviceTermsTxt, txt);
                 }
-            }, (code, msg) => {
-            });
-        
+            }, (code, msg) => { });
+
             Net.GetRequest(data.configs.serviceAgreementTxt, (txt) => {
                 if (!string.IsNullOrEmpty(txt)){
-                    DataStorage.SaveString(data.configs.serviceAgreementTxt, txt);   
+                    DataStorage.SaveString(data.configs.serviceAgreementTxt, txt);
                 }
-            }, (code, msg) => {
-            });
+            }, (code, msg) => { });
         }
 
         public void GetPrivacyTxt(string txtUrl, Action<string> callback){
@@ -139,12 +139,9 @@ namespace com.xd.intl.pc{
             } else{
                 Net.GetRequest(txtUrl, (data) => {
                     callback(data);
-                    DataStorage.SaveString(txtUrl, data);   
-                }, (code, msg) => {
-                    callback("");
-                });
+                    DataStorage.SaveString(txtUrl, data);
+                }, (code, msg) => { callback(""); });
             }
         }
-
     }
 }
