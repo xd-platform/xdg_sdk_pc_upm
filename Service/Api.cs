@@ -9,8 +9,8 @@ using UnityEngine;
 
 namespace com.xd.intl.pc{
     public class Api{
-        private readonly static string BASE_URL = "https://test-xdsdk-intnl-6.xd.com"; //测试
-        // private readonly static string BASE_URL = "https://xdsdk-intnl-6.xd.com"; //正式
+        // private readonly static string BASE_URL = "https://test-xdsdk-intnl-6.xd.com"; //测试
+        private readonly static string BASE_URL = "https://xdsdk-intnl-6.xd.com"; //正式
 
         //获取配置
         private readonly static string INIT_SDK = BASE_URL + "/api/init/v1/config";
@@ -52,9 +52,9 @@ namespace com.xd.intl.pc{
                     InitConfigModel.SaveToLocal(model);
                     
                     //网络没配置，就读本地配置
-                    // if (model.data.configs.tapSdkConfig == null){
+                    if (model.data.configs.tapSdkConfig == null){
                         model.data.configs.tapSdkConfig = InitConfigModel.TapSdkConfig.ReadLocalTapConfig();;
-                    // }
+                    }
 
                     var tapCfg = model.data.configs.tapSdkConfig;
                     TapLogin.Init(tapCfg.clientId, false, false);
