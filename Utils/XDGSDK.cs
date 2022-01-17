@@ -157,7 +157,16 @@ namespace com.xd.intl.pc{
                 Application.OpenURL(new WWW(url).url);
             }
         }
-        
+
+        public static void GetLocationInfo(Action<bool, IpInfoModel> callback){ //根据ip地址解析的
+            var model = IpInfoModel.GetLocalModel();
+            if (model == null){
+                Api.RequestIpInfo(false, callback);
+            } else{
+                callback(true, model);
+            }
+        }
+
         public static void Log(string msg){
             Debug.Log("-------------SDK 打印-------------\n" + msg + "\n\n");
         }

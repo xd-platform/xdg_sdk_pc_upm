@@ -83,6 +83,17 @@ XDGSDK.OpenUserCenter();
 XDGSDK.OpenCustomerCenter("serverId", "roleId", "roleName");
 ```
 
+#### 获取位置信息
+```
+XDGSDK.GetLocationInfo((success, md) => {
+if (success){
+ResultText.text = "地区信息：\ncountry: " + md.country + " \ncity: " + md.city + "\nregion:  " + md.country_code;
+} else{
+ResultText.text = "地区信息失败";
+}
+});
+```
+
 #### 退出登录
 ```
  XDGSDK.Logout();

@@ -200,9 +200,9 @@ namespace com.xd.intl.pc{
             RequestIpInfo(true, callback);
         }
 
-        private static void RequestIpInfo(bool repeat, Action<bool, IpInfoModel> callback){
+        public static void RequestIpInfo(bool repeat, Action<bool, IpInfoModel> callback){
             Net.GetRequest(IP_INFO, null, (data) => {
-                var model = XDGSDK.GetModel<IpInfoModel>(data);
+                    var model = XDGSDK.GetModel<IpInfoModel>(data);
                     IpInfoModel.SaveToLocal(model);
                     callback(true, model);
             }, (code, msg) => {
