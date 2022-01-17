@@ -12,6 +12,10 @@
 "com.unity.textmeshpro": "3.0.6",
 "com.xd.intl.pc": "https://github.com/xd-platform/xdg_sdk_pc_upm.git#{version}",
 ```
+
+## 1.1 Tap信息配置
+ 可以通过xd后台通过接口配置 `tapSdkConfig` 信息，如果后台接口没配置，则会读取本地 `/Assets/Resources/XD-Info.json` 里的配置，如果接口和本地都没配置则报错。
+
 ## 2.接口使用
 
 #### 设置语言
@@ -97,4 +101,23 @@ ResultText.text = "地区信息失败";
 #### 退出登录
 ```
  XDGSDK.Logout();
+```
+
+#### Windows平台网页登录需要在本地添加如下注册表
+```
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\open-taptap-Tap的ClientId]
+@="应用名称"
+"URL Protocol"="C:\\Users\\XD\\Desktop\\APP\\win_app\\app\\XDGSDK-PC-6.0.exe"  //改成自己的exe安装路径
+
+[HKEY_CLASSES_ROOT\open-taptap-Tap的ClientId]
+@="应用名称"
+
+[HKEY_CLASSES_ROOT\open-taptap-Tap的ClientId]
+
+[HKEY_CLASSES_ROOT\open-taptap-Tap的ClientId\Shell\Open]
+
+[HKEY_CLASSES_ROOT\open-taptap-Tap的ClientId\Shell\Open\Command]
+@="\"C:\\Users\\XD\\Desktop\\APP\\win_app\\app\\XDGSDK-PC-6.0.exe\" \"%1\""  //改成自己的exe安装路径
 ```
