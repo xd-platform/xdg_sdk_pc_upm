@@ -12,7 +12,8 @@ namespace com.xd.intl.pc{
 
         public static void SaveToLocal(IpInfoModel model){
             if (model != null){
-                var region = DataStorage.LoadString("region");
+                //测试用的
+                var region = DataStorage.LoadString("test_region");
                 if (!string.IsNullOrEmpty(region)){
                     model.country_code = region;
                 }

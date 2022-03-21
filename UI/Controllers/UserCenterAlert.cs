@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
-using com.xd.intl.pc;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 using Image = UnityEngine.UI.Image;
-
 
 namespace com.xd.intl.pc{
     public class UserCenterAlert : UIElement{
@@ -60,37 +57,35 @@ namespace com.xd.intl.pc{
         private void requestList(){
             if (dataList == null){
                 loadingView.SetActive(true);
-                Api.GetBindList((success, bindModel, msg) => {
-                    if (success){
-                        loadingView.SetActive(false);
-                        scrollView.GetComponentInChildren<Image>().color = new Color(0.95f, 0.95f, 0.95f, 1f);
+                Api.GetBindList((bindModel) => {
+                    loadingView.SetActive(false);
+                    scrollView.GetComponentInChildren<Image>().color = new Color(0.95f, 0.95f, 0.95f, 1f);
 
-                        dataList = new List<BindModel.Data>();
-                        var supportList = GetSupportTypes();
-                        foreach (var st in supportList){ //本地支持的都要显示
-                            var md = new BindModel.Data();
-                            md.loginType = st.typeValue;
-                            md.loginName = st.typeName;
-                            md.status = (int) BindType.UnBind;
+                    dataList = new List<BindModel.Data>();
+                    var supportList = GetSupportTypes();
+                    foreach (var st in supportList){ //本地支持的都要显示
+                        var md = new BindModel.Data();
+                        md.loginType = st.typeValue;
+                        md.loginName = st.typeName;
+                        md.status = (int) BindType.UnBind;
 
-                            foreach (var netMd in bindModel.data){ //插入对应的状态
-                                if (st.typeValue == netMd.loginType && netMd.status == (int) BindType.Bind){
-                                    md.status = netMd.status; //1未绑定
-                                    md.bindDate = netMd.bindDate;
-                                    break;
-                                }
+                        foreach (var netMd in bindModel.data){ //插入对应的状态
+                            if (st.typeValue == netMd.loginType && netMd.status == (int) BindType.Bind){
+                                md.status = netMd.status; //1未绑定
+                                md.bindDate = netMd.bindDate;
+                                break;
                             }
-
-                            dataList.Add(md);
                         }
 
-                        addCellView();
-                        errorView.SetActive(false);
-                    } else{
-                        Invoke("delayDismissLoading", 0.5f);
-                        errorView.SetActive(true);
-                        XDGSDK.Log("列表请求失败" + msg);
+                        dataList.Add(md);
                     }
+
+                    addCellView();
+                    errorView.SetActive(false);
+                }, (error) => {
+                    Invoke("delayDismissLoading", 0.5f);
+                    errorView.SetActive(true);
+                    XDGSDK.LogError("列表请求失败" + error.error_msg);
                 });
             }
         }
@@ -116,7 +111,7 @@ namespace com.xd.intl.pc{
                     if (md.status == (int) BindType.Bind){ //开始解绑
                         var dic = new Dictionary<string, object>(){
                             {"loginType", md.loginType},
-                            {"alertType", (int)getAlertType()},
+                            {"alertType", (int) getAlertType()},
                         };
                         UIManager.ShowUI<DeleteAccountAlert>(dic,
                             (code, data) => { unbind((LoginType) md.loginType, cellIndex); });
@@ -147,25 +142,25 @@ namespace com.xd.intl.pc{
         private void bind(LoginType loginType, int cellIndex){
             XDGSDK.Log("绑定： " + loginType);
             if (loginType == LoginType.TapTap){
-                Api.GetLoginParam(loginType, (success, param, tMsg) => {
-                    if (param != null){
-                        Api.bind(param, (success, msg) => {
-                            if (success){
-                                var cellMd = dataList[cellIndex];
-                                var cellView = cellList[cellIndex];
-                                cellMd.status = (int) BindType.Bind;
-                                cellView.refreshState(cellMd);
-                                UIManager.ShowToast(langModel.tds_bind_success);
-                            } else{
-                                if (string.IsNullOrEmpty(msg)){
-                                    UIManager.ShowToast(langModel.tds_bind_error);
-                                } else{
-                                    UIManager.ShowToast(msg);
-                                }
-                            }
-                        });
+                Api.GetLoginParam(loginType, (param) => {
+                    Api.bind(param, () => {
+                        var cellMd = dataList[cellIndex];
+                        var cellView = cellList[cellIndex];
+                        cellMd.status = (int) BindType.Bind;
+                        cellView.refreshState(cellMd);
+                        UIManager.ShowToast(langModel.tds_bind_success);
+                    }, (error) => {
+                        if (string.IsNullOrEmpty(error.error_msg)){
+                            UIManager.ShowToast(langModel.tds_bind_error);
+                        } else{
+                            UIManager.ShowToast(error.error_msg);
+                        }
+                    });
+                }, (error) => {
+                    if (string.IsNullOrEmpty(error.error_msg)){
+                        UIManager.ShowToast(langModel.tds_bind_error);
                     } else{
-                        UIManager.ShowToast(langModel.tds_login_cancel);
+                        UIManager.ShowToast(error.error_msg);
                     }
                 });
             }
@@ -173,35 +168,33 @@ namespace com.xd.intl.pc{
 
         private void unbind(LoginType loginType, int cellIndex){
             XDGSDK.Log("解绑： " + loginType);
-            Api.unbind(loginType, (success, msg) => {
-                if (success){
-                    if (loginType == LoginType.Guest){
-                        UIManager.ShowToast(langModel.tds_unbind_guest_return);
+            Api.unbind(loginType, () => {
+                if (loginType == LoginType.Guest){
+                    UIManager.ShowToast(langModel.tds_unbind_guest_return);
+                    XDGSDK.Logout();
+                    UIManager.DismissAll();
+                } else{
+                    if (dataList.Count == 1){ //唯一账号解除
+                        var cellMd = dataList[cellIndex];
+                        var cellView = cellList[cellIndex];
+                        cellMd.status = (int) BindType.UnBind;
+                        cellView.refreshState(cellMd);
+                        UIManager.ShowToast(langModel.tds_unbind_delete_success_return_sign);
                         XDGSDK.Logout();
                         UIManager.DismissAll();
-                    } else{
-                        if (dataList.Count == 1){ //唯一账号解除
-                            var cellMd = dataList[cellIndex];
-                            var cellView = cellList[cellIndex];
-                            cellMd.status = (int) BindType.UnBind;
-                            cellView.refreshState(cellMd);
-                            UIManager.ShowToast(langModel.tds_unbind_delete_success_return_sign);
-                            XDGSDK.Logout();
-                            UIManager.DismissAll();
-                        } else{ //不是唯一账号
-                            var cellMd = dataList[cellIndex];
-                            var cellView = cellList[cellIndex];
-                            cellMd.status = (int) BindType.UnBind;
-                            cellView.refreshState(cellMd);
-                            UIManager.ShowToast(langModel.tds_unbind_success);
-                        }
+                    } else{ //不是唯一账号
+                        var cellMd = dataList[cellIndex];
+                        var cellView = cellList[cellIndex];
+                        cellMd.status = (int) BindType.UnBind;
+                        cellView.refreshState(cellMd);
+                        UIManager.ShowToast(langModel.tds_unbind_success);
                     }
+                }
+            }, (error) => {
+                if (string.IsNullOrEmpty(error.error_msg)){
+                    UIManager.ShowToast(langModel.tds_unbind_error);
                 } else{
-                    if (string.IsNullOrEmpty(msg)){
-                        UIManager.ShowToast(langModel.tds_unbind_error);
-                    } else{
-                        UIManager.ShowToast(msg);
-                    }
+                    UIManager.ShowToast(error.error_msg);
                 }
             });
         }
@@ -217,6 +210,7 @@ namespace com.xd.intl.pc{
             if (num == 1){
                 return DeleteAlertType.DeleteThird;
             }
+
             return DeleteAlertType.Unbindthird;
         }
 
@@ -244,7 +238,7 @@ namespace com.xd.intl.pc{
         }
 
         public void errorViewTap(){
-            XDGSDK.Log("点击了");
+            XDGSDK.Log("点击了 errorViewTap");
             requestList();
         }
     }

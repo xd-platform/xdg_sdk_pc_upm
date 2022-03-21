@@ -7,16 +7,16 @@ using Json = com.xd.intl.pc.MiniJSON.Json;
 
 namespace com.xd.intl.pc{
     public class LanguageMg{
-        private static LanguageType anguageType = LanguageType.CN;
+        private static LangType anguageType = LangType.ZH_CN;
         private static string totalJson = null;
         private static LanguageModel currentModel = null;
 
-        public static void SetLanguageType(LanguageType type){
+        public static void SetLanguageType(LangType type){
             anguageType = type;
             UpdateLanguageModel();
         }
 
-        public static LanguageType GetCurrentType(){
+        public static LangType GetCurrentType(){
             return anguageType;
         }
 
@@ -42,68 +42,68 @@ namespace com.xd.intl.pc{
         }
 
         public static string GetLanguageKey(){
-            if (anguageType == LanguageType.CN){
+            if (anguageType == LangType.ZH_CN){
                 return @"zh_CN";
-            } else if (anguageType == LanguageType.TW){
+            } else if (anguageType == LangType.ZH_TW){
                 return @"zh_TW";
-            } else if (anguageType == LanguageType.US){
+            } else if (anguageType == LangType.EN){
                 return @"en_US";
-            } else if (anguageType == LanguageType.TH){
+            } else if (anguageType == LangType.TH){
                 return @"th_TH";
-            } else if (anguageType == LanguageType.ID){
+            } else if (anguageType == LangType.ID){
                 return @"in_ID";
-            } else if (anguageType == LanguageType.KR){
+            } else if (anguageType == LangType.KR){
                 return @"ko_KR";
-            } else if (anguageType == LanguageType.JP){
+            } else if (anguageType == LangType.JP){
                 return @"ja_JP";
-            } else if (anguageType == LanguageType.DE){
+            } else if (anguageType == LangType.DE){
                 return @"de_DE";
-            } else if (anguageType == LanguageType.FR){
+            } else if (anguageType == LangType.FR){
                 return @"fr_FR";
-            } else if (anguageType == LanguageType.PT){
+            } else if (anguageType == LangType.PT){
                 return @"pt_PT";
-            } else if (anguageType == LanguageType.ES){
+            } else if (anguageType == LangType.ES){
                 return @"es_ES";
-            } else if (anguageType == LanguageType.TR){
+            } else if (anguageType == LangType.TR){
                 return @"tr_TR";
-            } else if (anguageType == LanguageType.RU){
+            } else if (anguageType == LangType.RU){
                 return @"ru_RU";
             }
-            return @"zh_CN";
+            return @"en_US";
         }
         
         public static string GetCustomerCenterLang(){
-            if (anguageType == LanguageType.CN){
+            if (anguageType == LangType.ZH_CN){
                 return @"cn";
-            } else if (anguageType == LanguageType.TW){
+            } else if (anguageType == LangType.ZH_TW){
                 return @"tw";
-            } else if (anguageType == LanguageType.US){
+            } else if (anguageType == LangType.EN){
                 return @"us";
-            } else if (anguageType == LanguageType.TH){
+            } else if (anguageType == LangType.TH){
                 return @"th";
-            } else if (anguageType == LanguageType.ID){
+            } else if (anguageType == LangType.ID){
                 return @"id";
-            } else if (anguageType == LanguageType.KR){
+            } else if (anguageType == LangType.KR){
                 return @"kr";
-            } else if (anguageType == LanguageType.JP){
+            } else if (anguageType == LangType.JP){
                 return @"jp";
-            } else if (anguageType == LanguageType.DE){
+            } else if (anguageType == LangType.DE){
                 return @"de";
-            } else if (anguageType == LanguageType.FR){
+            } else if (anguageType == LangType.FR){
                 return @"fr";
-            } else if (anguageType == LanguageType.PT){
+            } else if (anguageType == LangType.PT){
                 return @"pt";
-            } else if (anguageType == LanguageType.ES){
+            } else if (anguageType == LangType.ES){
                 return @"es";
-            } else if (anguageType == LanguageType.TR){
+            } else if (anguageType == LangType.TR){
                 return @"tr";
-            } else if (anguageType == LanguageType.RU){
+            } else if (anguageType == LangType.RU){
                 return @"ru";
             }
-            return @"cn";
+            return @"us";
         }
 
-        private static string GetJsonPath(){
+        private static string GetJsonPath(){//废弃，app的方式，pc不可以
             var parentFolder = Directory.GetParent(Application.dataPath)?.FullName;
             var jsonPath = FilterFile(parentFolder + "/Library/PackageCache/", "com.xd.intl.pc@");
             if (string.IsNullOrEmpty(jsonPath)){

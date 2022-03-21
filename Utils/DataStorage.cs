@@ -15,6 +15,7 @@ namespace com.xd.intl.pc{
         public static readonly string UserInfo = "XD_UserInfoKey";
         public static readonly string ClientId = "XD_ClientIdKey";
         public static readonly string PrivacyKey = "XD_PrivacyKey";
+        public static readonly string SessionTokenKey = "XD_SessionTokenKey";
         
         private static Dictionary<string, string> dataCache;
         private static byte[] Keys ={0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF};

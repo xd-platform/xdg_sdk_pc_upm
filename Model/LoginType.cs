@@ -1,7 +1,8 @@
 namespace com.xd.intl.pc{
     public enum LoginType : int{ 
+        Default = -1,
         Guest  = 0,
-        TapTap = 5,  //值要与后台一致，如下
+        TapTap = 5,  //值要与后台一致, 看安卓的就知道了
     }
 }
 // ios的，要与后台一致！

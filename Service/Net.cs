@@ -4,8 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using Newtonsoft.Json.Linq;
-using UnityEditor;
 using UnityEngine.Networking;
 using Random = System.Random;
 
@@ -89,7 +87,7 @@ namespace com.xd.intl.pc{
             w.uploadHandler = new UploadHandlerRaw(formData);
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.SetRequestHeader("Accept-Language", LanguageMg.GetLanguageKey());
-            w.timeout = 6;
+            w.timeout = 10;
 
             var auth = GetMacToken(finalUrl, "POST");
             if (!string.IsNullOrEmpty(auth)){
@@ -142,7 +140,7 @@ namespace com.xd.intl.pc{
             UnityWebRequest w = UnityWebRequest.Get(finalUrl);
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.SetRequestHeader("Accept-Language", LanguageMg.GetLanguageKey());
-            w.timeout = 6;
+            w.timeout = 10;
 
             var auth = GetMacToken(finalUrl, "GET");
             if (!string.IsNullOrEmpty(auth)){
@@ -178,21 +176,6 @@ namespace com.xd.intl.pc{
                     methodForError(-1, str);
                 }
             }
-        }
-
-        private static int ParseResponseCode(string statusLine){
-            int ret = 0;
-
-            string[] components = statusLine.Split(' ');
-            if (components.Length < 3){
-                XDGSDK.LogError("invalid response status: " + statusLine);
-            } else{
-                if (!int.TryParse(components[1], out ret)){
-                    XDGSDK.LogError("invalid response code: " + components[1]);
-                }
-            }
-
-            return ret;
         }
 
         private static string DictToQueryString(IDictionary<string, object> dict){
@@ -335,13 +318,8 @@ namespace com.xd.intl.pc{
             var uri = new Uri(cfgMd.data.configs.webPayUrl);
             var url = $"{uri.Scheme}://{uri.Host}";
             var appId = cfgMd.data.configs.appId;
-            if ("1111".Equals(appId)){ //demo没有对应的支付网页，用FP的ID 
-                appId = "1001001";
-            }
 
             var lang = LanguageMg.GetLanguageKey();
-            lang = lang.Replace("_", "-");
-
             Dictionary<string, string> param = new Dictionary<string, string>{
                 {"serverId", serverId},
                 {"roleId", roleId},

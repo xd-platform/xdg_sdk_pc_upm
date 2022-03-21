@@ -1,19 +1,8 @@
 namespace com.xd.intl.pc{
     public class TokenModel : BaseModel{
-        public Data data{ get; set; }
-
-        public class Data{
-            public string kid{ get; set; }
-            public string tokenType{ get; set; }
-            public string macKey{ get; set; }
-            
-            public long expireIn{ get; set; }  //游客才有
-            
-            public string macAlgorithm{ get; set; } //tapTap才有
-        }
-
+        public XDGAccessToken data{ get; set; }
+        
         private static TokenModel currentMd = null;
-
         public static void SaveToLocal(TokenModel model){
             if (model != null){
                 string json = XDGSDK.GetJson(model);

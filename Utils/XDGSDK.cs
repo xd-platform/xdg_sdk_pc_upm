@@ -3,66 +3,53 @@ using System.Collections.Generic;
 using TapTap.Login;
 using UnityEngine;
 using Newtonsoft.Json;
+using TapTap.Bootstrap;
 
 namespace com.xd.intl.pc{
     public class XDGSDK{
-        private readonly static string VERSION = "6.0.0";
+        private readonly static string VERSION = "6.1.1";
         public static bool Tmp_IsInited = false;
         public static bool Tmp_IsInitSDK_ing = false;
 
         public static void InitSDK(string sdkClientId, Action<bool, string> callback){
             if (Tmp_IsInitSDK_ing){
-                XDGSDK.Log("正在初始化中...");
                 return;
             }
 
             if (Tmp_IsInited){
-                callback(true, "");
-                XDGSDK.Log("已经初始化过了");
+                callback(true, "已经初始化");
                 return;
             }
 
             Tmp_IsInitSDK_ing = true;
-            XDGUserModel.ClearUserData();
-            Api.GetIpInfo((success, model) => {
-                if (success){
-                    Api.InitSDK(sdkClientId, callback);
-                } else{
-                    callback(false,"Get IP Info Error");
-                    Tmp_IsInitSDK_ing = false;
-                }
+            Api.GetIpInfo((model) => {
+                Api.InitSDK(sdkClientId, callback);
+            },(error)=>{
+                callback(false, error.error_msg);
+                Tmp_IsInitSDK_ing = false;
             });
         }
 
-        public static void LoginTyType(LoginType loginType, Action<bool, XDGUserModel, string> callback){
-            if (!IsInited()){
-                XDGSDK.Log("请先初始化！");
-                callback(false, null, "Please init first");
+        public static void LoginTyType(LoginType loginType, Action<XDGUser> callback, Action<XDGError> errorCallback){
+            if (!IsInitialized()){
+                errorCallback(XDGError.msg("Please init first"));
                 return;
             }
-            var md = XDGUserModel.GetLocalModel();
-            if (md != null){
-                XDGSDK.Log("已经登录了");
-                callback(true, md, "");
-                return;
-            }
-            Api.LoginTyType(loginType, callback);
+            Api.LoginTyType(loginType, callback, errorCallback);
         }
 
-        public static void GetUserInfo(Action<bool, XDGUserModel, string> callback){
-            if (!IsInited()){
-                XDGSDK.Log("请先初始化！");
-                callback(false, null, "Please init first");
+        public static void GetUser(Action<XDGUser> callback, Action<XDGError> errorCallback){
+            if (!IsInitialized()){
+                errorCallback(XDGError.msg("Please init first"));
                 return;
             }
 
             if (TokenModel.GetLocalModel() == null){
-                XDGSDK.Log("请先登录！");
-                callback(false, null, "Please login first");
+                errorCallback(XDGError.msg("Please login first"));
                 return;
             }
 
-            Api.GetUserInfo(callback);
+            Api.RequestUserInfo(callback, errorCallback);
         }
 
         public static bool IsPushServiceEnable(){
@@ -73,9 +60,10 @@ namespace com.xd.intl.pc{
             XDGUserModel.SetPushServiceEnable(enable);
         }
 
-        public static void Logout(){
-            XDGUserModel.ClearUserData();
+        public static async void Logout(){
+            await TDSUser.Logout();
             TapLogin.Logout();
+            XDGUserModel.ClearUserData(); 
         }
 
         public static string GetSdkVersion(){
@@ -100,17 +88,16 @@ namespace com.xd.intl.pc{
             UIManager.ShowUI<UserCenterAlert>(null, null);
         }
 
-        public static bool IsInited(){
+        public static bool IsInitialized(){
             return Tmp_IsInited;
         }
 
-        public static void SetLanguage(LanguageType type){
+        public static void SetLanguage(LangType type){
             LanguageMg.SetLanguageType(type);
         }
 
-        public static void CheckPay(Action<CheckPayType, string> callback){
-            Api.checkPay((success, model, msg) => {
-                if (success){
+        public static void CheckPay(Action<CheckPayType> callback, Action<XDGError> errorCallback){
+            Api.checkPay((model) => {
                     if (model.data.list != null && model.data.list.Count > 0){
                         var hasIOS = false;
                         var hasAndroid = false;
@@ -118,34 +105,33 @@ namespace com.xd.intl.pc{
                             if (md.platform == 1){
                                 hasIOS = true;
                             }
+
                             if (md.platform == 2){
                                 hasAndroid = true;
                             }
                         }
+
                         if (hasIOS || hasAndroid){
                             var param = new Dictionary<string, object>(){
-                                {"hasIOS",hasIOS },
-                                {"hasAndroid",hasAndroid},
+                                {"hasIOS", hasIOS},
+                                {"hasAndroid", hasAndroid},
                             };
-                            UIManager.ShowUI<PayHintAlert>(param, null);   
+                            UIManager.ShowUI<PayHintAlert>(param, null);
                         }
 
                         if (hasIOS && hasAndroid){
-                            callback(CheckPayType.All, "iOS,Android 都需要补款");
-                        }else if (hasIOS){
-                            callback(CheckPayType.iOS, "iOS 需要补款");
-                        }else if (hasAndroid){
-                            callback(CheckPayType.Android, "Android 需要补款");
+                            callback(CheckPayType.iOSAndAndroid);
+                        } else if (hasIOS){
+                            callback(CheckPayType.iOS);
+                        } else if (hasAndroid){
+                            callback(CheckPayType.Android);
                         } else{
-                            callback(CheckPayType.None, "没有需要补款的");
+                            callback(CheckPayType.None);
                         }
                     } else{
-                        callback(CheckPayType.None, "没有需要补款的");
+                        callback(CheckPayType.None);
                     }
-                } else{
-                    callback(CheckPayType.Error, msg);
-                }
-            });
+            }, errorCallback);
         }
 
         public static void OpenWebPay(string serverId, string roleId){
@@ -158,28 +144,29 @@ namespace com.xd.intl.pc{
             }
         }
 
-        public static void GetLocationInfo(Action<bool, IpInfoModel> callback){ //根据ip地址解析的
+        public static void GetLocationInfo(Action<IpInfoModel> callback, Action<XDGError> errorCallback){ //根据ip地址解析的
             var model = IpInfoModel.GetLocalModel();
             if (model == null){
-                Api.RequestIpInfo(false, callback);
+                Api.RequestIpInfo(true, callback, errorCallback);
             } else{
-                callback(true, model);
+                callback(model);
             }
         }
 
         public static void Log(string msg){
-            Debug.Log("-------------SDK 打印-------------\n" + msg + "\n\n");
+            Debug.Log($"-------------PCGSDK Log-------------\n {msg} \n\n");
         }
 
         public static void LogError(string msg){
-            Debug.LogError("-------------SDK 报错-------------\n" + msg + "\n\n");
+            var umd = XDGUserModel.GetLocalModel();
+            var userId = (umd == null ? "" : umd.data.userId);
+            Debug.LogError($"-------------PCGSDK LogError-------------\n userId:【{userId}】{msg} \n\n");
         }
 
         public static T GetModel<T>(string json) where T : BaseModel{
             if (string.IsNullOrEmpty(json)){
                 return null;
             }
-
             return JsonConvert.DeserializeObject<T>(json);
         }
 

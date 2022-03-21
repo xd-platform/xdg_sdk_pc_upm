@@ -129,7 +129,7 @@ namespace com.xd.intl.pc{
             Action<int, object> callback) where T : UIElement{
             GameObject gameObj = Instantiate(Resources.Load("Prefabs/" + prefabName)) as GameObject;
             if (gameObj == null){
-                XDGSDK.LogError("没找到 prefab named： \"" + prefabName + "\"");
+                XDGSDK.Log("没找到 prefab named： \"" + prefabName + "\"");
             } else{
                 if (uiElements.Count == 0 && containerObj == null){
                     CreateContainer();
@@ -162,12 +162,12 @@ namespace com.xd.intl.pc{
 
         private void PopUIElement(string targetName){
             if (containerObj == null || uiElements.Count == 0){
-                XDGSDK.LogError("没有 UIElement 子类可处理.");
+                XDGSDK.Log("没有 UIElement 子类可处理.");
             } else{
                 UIElement element = uiElements[uiElements.Count - 1];
 
                 if (targetName != null && !targetName.Equals(element.name)){
-                    XDGSDK.LogError("没找到 UIElement 子类: " + targetName);
+                    XDGSDK.Log("没找到 UIElement 子类: " + targetName);
                     return;
                 }
 

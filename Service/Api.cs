@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using LeanCloud.Storage;
 using TapTap.Bootstrap;
 using TapTap.Common;
 using TapTap.Login;
-using UnityEditor;
 using UnityEngine;
 
 namespace com.xd.intl.pc{
     public class Api{
-        // private readonly static string BASE_URL = "https://test-xdsdk-intnl-6.xd.com"; //测试
-        private readonly static string BASE_URL = "https://xdsdk-intnl-6.xd.com"; //正式
+        private readonly static string BASE_URL = "https://test-xdsdk-intnl-6.xd.com"; //测试
+        // private readonly static string BASE_URL = "https://xdsdk-intnl-6.xd.com"; //正式
 
         //获取配置
         private readonly static string INIT_SDK = BASE_URL + "/api/init/v1/config";
@@ -35,55 +35,63 @@ namespace com.xd.intl.pc{
 
         // 解绑接口
         private readonly static string XDG_UNBIND_INTERFACE = BASE_URL + "/api/account/v1/unbind";
-        
+
         // 查询补款订单信息
-        private readonly static string XDG_PAYBACK_LIST   = BASE_URL + "/order/v1/user/repayOrders";  
+        private readonly static string XDG_PAYBACK_LIST = BASE_URL + "/order/v1/user/repayOrders";
 
         private readonly static string TDSG_GLOBAL_SDK_DOMAIN = "https://xdg-1c20f-intl.xd.com";
 
-        private readonly static int SUCCESS = 200; 
-        
-        public static void InitSDK(string sdkClientId,
-            Action<bool, string> callback){
+        private readonly static int SUCCESS = 200;
+
+        public static void InitSDK(string sdkClientId, Action<bool, string> callback){
             DataStorage.SaveString(DataStorage.ClientId, sdkClientId);
             Net.GetRequest(INIT_SDK, null, (data) => {
                 var model = XDGSDK.GetModel<InitConfigModel>(data);
                 if (model.code == SUCCESS){
                     InitConfigModel.SaveToLocal(model);
-                    
-                    //网络没配置，就读本地配置
-                    if (model.data.configs.tapSdkConfig == null){
-                        model.data.configs.tapSdkConfig = InitConfigModel.TapSdkConfig.ReadLocalTapConfig();;
-                    }
-
-                    var tapCfg = model.data.configs.tapSdkConfig;
-                    TapLogin.Init(tapCfg.clientId, false, false);
-                    var config = new TapConfig.Builder()
-                        .ClientID(tapCfg.clientId) // 必须，开发者中心对应 Client ID
-                        .ClientToken(tapCfg.clientToken) // 必须，开发者中心对应 Client Token
-                        .ServerURL(tapCfg.serverUrl) // 开发者中心 > 你的游戏 > 游戏服务 > 云服务 > 数据存储 > 服务设置 > 自定义域名 绑定域名
-                        .RegionType(RegionType.IO) // 非必须，默认 CN 表示国内
-                        .TapDBConfig(tapCfg.enableTapDB, tapCfg.tapDBChannel, Application.version)
-                        .ConfigBuilder();
-                    TapBootstrap.Init(config);
-
-                    callback(true,"");
-                    XDGSDK.Tmp_IsInited = true;
-                    XDGSDK.Tmp_IsInitSDK_ing = false;
+                    InitBootstrap(model, callback, "");
                 } else{
-                    callback(false,model.msg);
-                    XDGSDK.Tmp_IsInitSDK_ing = false;
+                    InitBootstrap(InitConfigModel.GetLocalModel(), callback, model.msg);
                 }
             }, (code, msg) => {
-                XDGSDK.Log("初始化失败 code: " + code + " msg: " + msg);
-                callback(false, msg);
-                XDGSDK.Tmp_IsInitSDK_ing = false;
+                InitBootstrap(InitConfigModel.GetLocalModel(), callback, msg);
+                XDGSDK.LogError($"初始化失败：code:{code} msg:{msg}");
             });
         }
 
-        public static void LoginTyType(LoginType loginType, Action<bool, XDGUserModel, string> callback){
-            GetLoginParam(loginType, (pSuccess,param,tMsg) => {
-                if (param != null){
+        private static void InitBootstrap(InitConfigModel infoMd, Action<bool, string> callback, string msg){
+            if (infoMd != null){
+                var tapCfg = infoMd.data.configs.tapSdkConfig;
+                TapLogin.Init(tapCfg.clientId, false, false);
+                var config = new TapConfig.Builder()
+                    .ClientID(tapCfg.clientId)
+                    .ClientToken(tapCfg.clientToken)
+                    .ServerURL(tapCfg.serverUrl)
+                    .RegionType(RegionType.IO) //IO：海外 
+                    .TapDBConfig(tapCfg.enableTapDB, tapCfg.tapDBChannel, Application.version)
+                    .ConfigBuilder();
+                TapBootstrap.Init(config);
+
+                callback(true, msg);
+                XDGSDK.Tmp_IsInited = true;
+            } else{
+                callback(false, msg);
+            }
+
+            XDGSDK.Tmp_IsInitSDK_ing = false;
+        }
+
+        public static void LoginTyType(LoginType loginType, Action<XDGUser> callback, Action<XDGError> errorCallback){
+            var lmd = LanguageMg.GetCurrentModel();
+            if (loginType == LoginType.Default){
+                var localUser = XDGUserModel.GetLocalModel();
+                if (localUser != null){
+                    AsyncLocalTdsUser(localUser.data, SyncTokenModel.GetLocalToken(), callback, errorCallback);
+                } else{
+                    errorCallback(XDGError.msg(lmd.tds_login_failed));
+                }
+            } else{
+                GetLoginParam(loginType, (param) => {
                     UIManager.ShowLoading();
                     Net.PostRequest(XDG_COMMON_LOGIN, param, (data) => {
                         UIManager.DismissLoading();
@@ -91,130 +99,145 @@ namespace com.xd.intl.pc{
                         var model = XDGSDK.GetModel<TokenModel>(data);
                         if (model.code == SUCCESS){
                             TokenModel.SaveToLocal(model);
-                            GetUserInfo((userSuccess, userMd, uMsg) => {
-                                if (userSuccess){
-                                    SyncTdsUser((tdsSuccess, tdsMsg) => {
-                                        if (tdsSuccess){
-                                            CheckPrivacyAlert(isPass => {
-                                                if (isPass){
-                                                    callback(true, userMd, "");
-                                                }
-                                            });
-                                        } else{
-                                            callback(false, null, tdsMsg);
+                            RequestUserInfo((userMd) => {
+                                AsyncNetworkTdsUser(userMd.userId, (sessionToken) => {
+                                    CheckPrivacyAlert(isPass => {
+                                        if (isPass){
+                                            callback(userMd);
                                         }
                                     });
-                                } else{
-                                    callback(false, null, uMsg);
-                                }
+                                }, errorCallback);
+                            }, (error) => {
+                                errorCallback(XDGError.msg(error.error_msg));
                             });
                         } else{
-                            callback(false, null, model.msg);
+                            errorCallback(XDGError.msg(model.msg));
                         }
                     }, (code, msg) => {
-                        XDGSDK.Log("登录失败 code: " + code + " msg: " + msg);
+                        XDGSDK.LogError("登录失败 code: " + code + " msg: " + msg);
                         UIManager.DismissLoading();
-                        UIManager.ShowToast(msg);
-                        callback(false, null, msg);
+                        errorCallback(XDGError.msg(msg));
                     });
-                } else{
-                    callback(false, null, tMsg);
-                }
-            });
+                }, errorCallback);
+            }
         }
 
-        public static void GetLoginParam(LoginType loginType, Action<bool,Dictionary<string, object>, string> callback){
+        public static void GetLoginParam(LoginType loginType, Action<Dictionary<string, object>> callback, Action<XDGError> errorCallback){
             if (loginType == LoginType.Guest){
                 Dictionary<string, object> param = new Dictionary<string, object>{
                     {"type", (int) loginType},
                     {"token", SystemInfo.deviceUniqueIdentifier}
                 };
-                callback(true, param, "");
+                callback(param);
             } else if (loginType == LoginType.TapTap){
-                GetTapToken((success, md,tMsg) => {
-                    if (success){
-                        Dictionary<string, object> param = new Dictionary<string, object>{
-                            {"type", (int) loginType},
-                            {"token", md.kid},
-                            {"secret", md.macKey},
-                        };
-                        callback(true, param, "");
-                    } else{
-                        callback(false, null, tMsg);
-                    }
-                });
+                RequestTapToken((md) => {
+                    Dictionary<string, object> param = new Dictionary<string, object>{
+                        {"type", (int) loginType},
+                        {"token", md.kid},
+                        {"secret", md.macKey},
+                    };
+                    callback(param);
+                }, errorCallback);
+            } else{
+                errorCallback(XDGError.msg("No Login Param"));
             }
         }
 
-        private async static void GetTapToken(Action<bool, AccessToken, string> callback){
+        private static async void RequestTapToken(Action<AccessToken> callback, Action<XDGError> errorCallback){
             try{
                 var accessToken = await TapLogin.Login();
-                callback(true, accessToken, "");
+                callback(accessToken);
             } catch (Exception e){
                 var msg = "登录失败";
                 if (e is TapException tapError){
-                    if (tapError.code == (int) TapErrorCode.ERROR_CODE_BIND_CANCEL){
-                        XDGSDK.Log("Tap 登录取消");
-                        msg = "登录取消";
+                    msg = tapError.message;
+                    if (tapError.code == (int) TapErrorCode.ERROR_CODE_BIND_CANCEL){ //取消登录
+                        XDGSDK.Log($"取消登录：{tapError.code}  {msg}");
+                        errorCallback(new XDGError(tapError.code, msg));
+                        return;
                     } else{
-                        XDGSDK.Log($"Tap 登录失败: code: {tapError.code},  message: {tapError.message}");
+                        XDGSDK.LogError($"Tap 登录失败: code: {tapError.code},  message: {msg}");
                     }
                 }
-                callback(false, null, msg);
+                errorCallback(XDGError.msg(msg));
             }
         }
 
-        private static void SyncTdsUser(Action<bool, string> callback){
-            Net.PostRequest(XDG_LOGIN_SYN, null, async( data) => {
+        private static async void AsyncLocalTdsUser(XDGUser xdgUser, string sessionToken, Action<XDGUser> callback, Action<XDGError> errorCallback){
+            if (!string.IsNullOrEmpty(sessionToken)){
+                LCUser user = LCObject.CreateWithoutData(LCUser.CLASS_NAME, xdgUser.userId) as LCUser;
+                user.SessionToken = sessionToken;
+                await user.SaveToLocal();
+                callback(xdgUser);
+            } else{ //不可能进这里，有user肯定有token
+                XDGSDK.LogError("内建账号失败，缓存sessionToken是空");
+                errorCallback(XDGError.msg("内建账号失败"));
+            }
+        }
+
+        private static void AsyncNetworkTdsUser(string userId, Action<string> callback, Action<XDGError> errorCallback){
+            Net.PostRequest(XDG_LOGIN_SYN, null, async (data) => {
                 var md = XDGSDK.GetModel<SyncTokenModel>(data);
                 if (md.code == SUCCESS){
                     XDGSDK.Log("sync token: " + md.data.sessionToken);
-                    await TDSUser.BecomeWithSessionToken(md.data.sessionToken);
-                    callback(true, "");   
+                    SyncTokenModel.SaveToLocal(md.data.sessionToken);
+
+                    LCUser lcUser = LCObject.CreateWithoutData(LCUser.CLASS_NAME, userId) as LCUser;
+                    lcUser.SessionToken = md.data.sessionToken;
+                    await lcUser.SaveToLocal();
+
+                    callback(md.data.sessionToken);
                 } else{
-                    callback(false, md.msg);   
+                    errorCallback(XDGError.msg(md.msg));
                 }
-            }, (code, msg) => {
-                XDGUserModel.ClearUserData();
-                callback(false, msg);
-                XDGSDK.Log("SyncTdsUser 失败 code: " + code + " msg: " + msg);
+            }, async (code, msg) => {
+                var token = SyncTokenModel.GetLocalToken();
+                if (!string.IsNullOrEmpty(token)){
+                    LCUser lcUser = LCObject.CreateWithoutData(LCUser.CLASS_NAME, userId) as LCUser;
+                    lcUser.SessionToken = token;
+                    await lcUser.SaveToLocal();
+                    callback(token);
+                } else{
+                    errorCallback(new XDGError(code, msg));
+                    XDGSDK.LogError("内建账号失败 code: " + code + " msg: " + msg);
+                }
             });
         }
 
-        public static void GetUserInfo(Action<bool, XDGUserModel, string> callback){
+        public static void RequestUserInfo(Action<XDGUser> callback, Action<XDGError> errorCallback){
             Net.GetRequest(XDG_USER_PROFILE, null, (data) => {
                 var model = XDGSDK.GetModel<XDGUserModel>(data);
                 if (model.code == SUCCESS){
                     XDGUserModel.SaveToLocal(model);
-                    callback(true, model, "");
+                    callback(model.data);
                 } else{
-                    callback(false, null, model.msg);
+                    errorCallback(XDGError.msg(model.msg));
                 }
             }, (code, msg) => {
-                XDGSDK.Log("获取用户信息失败 code: " + code + " msg: " + msg);
-                callback(false, null, msg);
+                XDGSDK.LogError("获取用户信息失败 code: " + code + " msg: " + msg);
+                errorCallback(new XDGError(code, msg));
             });
         }
 
-        public static void GetIpInfo(Action<bool, IpInfoModel> callback){
-            RequestIpInfo(true, callback);
+        public static void GetIpInfo(Action<IpInfoModel> callback, Action<XDGError> errorCallback){
+            RequestIpInfo(true, callback, errorCallback);
         }
 
-        public static void RequestIpInfo(bool repeat, Action<bool, IpInfoModel> callback){
+        public static void RequestIpInfo(bool repeat, Action<IpInfoModel> callback, Action<XDGError> errorCallback){
             Net.GetRequest(IP_INFO, null, (data) => {
-                    var model = XDGSDK.GetModel<IpInfoModel>(data);
-                    IpInfoModel.SaveToLocal(model);
-                    callback(true, model);
+                var model = XDGSDK.GetModel<IpInfoModel>(data);
+                IpInfoModel.SaveToLocal(model);
+                callback(model);
             }, (code, msg) => {
                 if (repeat){
-                    RequestIpInfo(false, callback);
+                    RequestIpInfo(false, callback, errorCallback);
                 } else{
                     var oldMd = IpInfoModel.GetLocalModel();
                     if (oldMd != null){
-                        callback(true, oldMd);
+                        callback(oldMd);
                     } else{
-                        XDGSDK.Log("获取 ip info 失败 code: " + code + " msg: " + msg);
-                        callback(false, null);
+                        XDGSDK.LogError("获取 ip info 失败 code: " + code + " msg: " + msg);
+                        errorCallback(new XDGError(code, msg));
                     }
                 }
             });
@@ -232,69 +255,68 @@ namespace com.xd.intl.pc{
             }
         }
 
-        public static void GetBindList(Action<bool, BindModel, string> callback){
+        public static void GetBindList(Action<BindModel> callback, Action<XDGError> errorCallback){
             Net.GetRequest(XDG_BIND_LIST, null, (data) => {
                 var md = XDGSDK.GetModel<BindModel>(data);
                 if (md.code == SUCCESS){
-                    callback(true, md, "");   
+                    callback(md);
                 } else{
-                    callback(false, null, md.msg);
+                    errorCallback(new XDGError(md.code, md.msg));
                 }
-            }, (code, msg) => { callback(false, null, msg); });
+            }, (code, msg) => { errorCallback(new XDGError(code, msg)); });
         }
 
-        public static void bind(Dictionary<string, object>param, Action<bool, string> callback){
+        public static void bind(Dictionary<string, object> param, Action callback, Action<XDGError> errorCallback){
             Net.PostRequest(XDG_BIND_INTERFACE, param, (data) => {
                     var md = XDGSDK.GetModel<BaseModel>(data);
                     if (md.code == SUCCESS){
-                        callback(true, "");   
+                        callback();
                     } else{
-                        callback(false, md.msg);
+                        errorCallback(new XDGError(md.code, md.msg));
                     }
                 },
                 (code, msg) => {
-                    callback(false,msg);
+                    errorCallback(new XDGError(code, msg));
+                    XDGSDK.LogError($"绑定失败 param:{param} code:{code} msg:{msg}");
                 });
         }
 
-        public static void unbind(LoginType loginType, Action<bool, string> callback){
+        public static void unbind(LoginType loginType, Action callback, Action<XDGError> errorCallback){
             var param = new Dictionary<string, object>(){
                 {"type", (int) loginType}
             };
             Net.PostRequest(XDG_UNBIND_INTERFACE, param, (data) => {
                     var md = XDGSDK.GetModel<BaseModel>(data);
                     if (md.code == SUCCESS){
-                        callback(true, "");   
+                        callback();
                     } else{
-                        callback(false, md.msg);
+                        errorCallback(new XDGError(md.code, md.msg));
                     }
                 },
                 (code, msg) => {
-                    callback(false,msg);
+                    errorCallback(new XDGError(code, msg));
+                    XDGSDK.LogError($"解绑失败 param:{param} code:{code} msg:{msg}");
                 });
         }
 
-        public static void checkPay(Action<bool, PayCheckModel, string> callback){
+        public static void checkPay(Action<PayCheckModel> callback, Action<XDGError> errorCallback){
             var umd = XDGUserModel.GetLocalModel();
             if (umd == null){
-                XDGSDK.Log("checkPay前请先登录！");
-                return;;
+                errorCallback(XDGError.msg("Please Login First"));
+                return;
             }
 
             var param = new Dictionary<string, object>(){
-                {"userId",umd.data.userId },
+                {"userId", umd.data.userId},
             };
             Net.GetRequest(XDG_PAYBACK_LIST, param, data => {
                 var pmd = XDGSDK.GetModel<PayCheckModel>(data);
                 if (pmd.code == SUCCESS){
-                    callback(true, pmd, "");
+                    callback(pmd);
                 } else{
-                    callback(false, null, pmd.msg);
+                    errorCallback(new XDGError(pmd.code, pmd.msg));
                 }
-            }, (code, msg) => {
-                callback(false, null, msg);
-            });
+            }, (code, msg) => { errorCallback(new XDGError(code, msg)); });
         }
-
     }
 }

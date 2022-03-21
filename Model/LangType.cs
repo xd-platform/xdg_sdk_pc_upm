@@ -1,8 +1,8 @@
 namespace com.xd.intl.pc{
-    public enum LanguageType{
-        CN = 0,
-        TW = 1,
-        US = 2,
+    public enum LangType{
+        ZH_CN = 0,
+        ZH_TW = 1,
+        EN = 2,
         TH = 3,
         ID = 4,
         KR = 5,

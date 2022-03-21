@@ -2,31 +2,7 @@ using System.Collections.Generic;
 
 namespace com.xd.intl.pc{
     public class XDGUserModel : BaseModel{
-        public Data data{ get; set; }
-
-        public class Data{
-            public long appId{ get; set; }
-            public string userId{ get; set; }
-            public string userCode{ get; set; }
-            public string username{ get; set; }
-            public string nickName{ get; set; }
-            public string avatar{ get; set; }
-            public long loginType{ get; set; }
-            public string registTime{ get; set; }
-            public string registIp{ get; set; }
-            public long source{ get; set; }
-            public List<string> loginList{ get; set; }
-            public bool isGuest{ get; set; }
-
-            public LoginType GetLoginType(){
-                if (this.loginType == 0){
-                    return LoginType.Guest;
-                } else if (this.loginType == 5){
-                    return LoginType.TapTap;
-                }
-                return LoginType.Guest;
-            }
-        }
+        public XDGUser data{ get; set; }
 
         private static XDGUserModel currentMd = null;
 
@@ -45,7 +21,6 @@ namespace com.xd.intl.pc{
                     currentMd = XDGSDK.GetModel<XDGUserModel>(json);
                 }
             }
-
             return currentMd;
         }
 
@@ -53,6 +28,7 @@ namespace com.xd.intl.pc{
             currentMd = null;
             DataStorage.SaveString(DataStorage.UserInfo, "");
             TokenModel.ClearToken();
+            SyncTokenModel.ClearToken();
         }
 
         public static bool IsPushServiceEnable(){
