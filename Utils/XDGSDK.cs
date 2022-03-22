@@ -38,7 +38,7 @@ namespace com.xd.intl.pc{
             Api.LoginTyType(loginType, callback, errorCallback);
         }
 
-        public static void GetUser(Action<XDGUser> callback, Action<XDGError> errorCallback){
+        public static void GetUserInfo(Action<XDGUser> callback, Action<XDGError> errorCallback){
             if (!IsInitialized()){
                 errorCallback(XDGError.msg("Please init first"));
                 return;

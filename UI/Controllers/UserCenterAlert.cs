@@ -166,7 +166,7 @@ namespace com.xd.intl.pc{
             }
         }
 
-        private void unbind(LoginType loginType, int cellIndex){
+        private void unbind(LoginType loginType, int cellIndex){ 
             XDGSDK.Log("解绑： " + loginType);
             Api.unbind(loginType, () => {
                 if (loginType == LoginType.Guest){
@@ -174,7 +174,7 @@ namespace com.xd.intl.pc{
                     XDGSDK.Logout();
                     UIManager.DismissAll();
                 } else{
-                    if (dataList.Count == 1){ //唯一账号解除
+                    if (dataList.Count == 1){ //解绑最后一个绑定的第三方，和删除账号一个逻辑
                         var cellMd = dataList[cellIndex];
                         var cellView = cellList[cellIndex];
                         cellMd.status = (int) BindType.UnBind;
@@ -199,7 +199,7 @@ namespace com.xd.intl.pc{
             });
         }
 
-        private DeleteAlertType getAlertType(){ //解绑最后一个第三方？
+        private DeleteAlertType getAlertType(){ //解绑最后一个第三方？和删除账号一样
             var num = 0;
             foreach (var md in dataList){
                 if (md.status == (int) BindType.Bind){

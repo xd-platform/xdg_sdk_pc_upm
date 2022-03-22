@@ -151,7 +151,7 @@ namespace com.xd.intl.pc{
                 var msg = "登录失败";
                 if (e is TapException tapError){
                     msg = tapError.message;
-                    if (tapError.code == (int) TapErrorCode.ERROR_CODE_BIND_CANCEL){ //取消登录
+                    if (tapError.code == (int) TapErrorCode.ERROR_CODE_LOGIN_CANCEL){ //取消登录
                         XDGSDK.Log($"取消登录：{tapError.code}  {msg}");
                         errorCallback(new XDGError(tapError.code, msg));
                         return;
