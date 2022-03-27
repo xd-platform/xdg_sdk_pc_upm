@@ -87,7 +87,7 @@ namespace com.xd.intl.pc{
             w.uploadHandler = new UploadHandlerRaw(formData);
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.SetRequestHeader("Accept-Language", LanguageMg.GetLanguageKey());
-            w.timeout = 10;
+            w.timeout = 6;
 
             var auth = GetMacToken(finalUrl, "POST");
             if (!string.IsNullOrEmpty(auth)){
@@ -135,12 +135,12 @@ namespace com.xd.intl.pc{
         private IEnumerator Get(string url, Dictionary<string, object> parameters,
             Action<string> methodForResult,
             Action<int, string> methodForError){
-            string finalUrl = url + "?" + DictToQueryString(parameters) + DictToQueryString2(GetCommonParam(url));
+            string finalUrl = url + "?" + DictToQueryString(parameters) + "&" + DictToQueryString2(GetCommonParam(url));
 
             UnityWebRequest w = UnityWebRequest.Get(finalUrl);
             w.SetRequestHeader("Content-Type", "application/json;charset=utf-8");
             w.SetRequestHeader("Accept-Language", LanguageMg.GetLanguageKey());
-            w.timeout = 10;
+            w.timeout = 6;
 
             var auth = GetMacToken(finalUrl, "GET");
             if (!string.IsNullOrEmpty(auth)){
@@ -251,7 +251,7 @@ namespace com.xd.intl.pc{
                 {"appId", cfgMd == null ? "" : cfgMd.data.configs.appId + ""},
                 {"did", SystemInfo.deviceUniqueIdentifier},
                 {"sdkLang", LanguageMg.GetLanguageKey()},
-                {"lang", Application.systemLanguage.ToString()},
+                {"lang", LanguageMg.GetLanguageKey()},
                 {"loc", ipMd.country_code},
                 {"time", new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds() + ""},
                 {"chn", "PC"},
@@ -324,10 +324,8 @@ namespace com.xd.intl.pc{
                 {"serverId", serverId},
                 {"roleId", roleId},
                 {"region", cfgMd.data.configs.region},
-                {"appId", appId},
-                {"lang", lang},
             };
-            return url + "?" + DictToQueryString2(param);
+            return url + "?" + DictToQueryString2(param) + "&" + DictToQueryString2(GetCommonParam(""));
         }
 
         private static string GetPlatform(){

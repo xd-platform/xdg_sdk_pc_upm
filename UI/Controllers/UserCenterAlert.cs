@@ -150,19 +150,23 @@ namespace com.xd.intl.pc{
                         cellView.refreshState(cellMd);
                         UIManager.ShowToast(langModel.tds_bind_success);
                     }, (error) => {
-                        if (string.IsNullOrEmpty(error.error_msg)){
-                            UIManager.ShowToast(langModel.tds_bind_error);
-                        } else{
-                            UIManager.ShowToast(error.error_msg);
-                        }
+                       showBindError(error);
                     });
                 }, (error) => {
-                    if (string.IsNullOrEmpty(error.error_msg)){
-                        UIManager.ShowToast(langModel.tds_bind_error);
-                    } else{
-                        UIManager.ShowToast(error.error_msg);
-                    }
+                   showBindError(error);
                 });
+            }
+        }
+
+        private void showBindError(XDGError error){
+            if (error.code == 80081){
+                UIManager.ShowToast(langModel.tds_login_cancel);
+            } else{
+                if (string.IsNullOrEmpty(error.error_msg)){
+                    UIManager.ShowToast(langModel.tds_bind_error);
+                } else{
+                    UIManager.ShowToast(error.error_msg);
+                }   
             }
         }
 
@@ -172,6 +176,7 @@ namespace com.xd.intl.pc{
                 if (loginType == LoginType.Guest){
                     UIManager.ShowToast(langModel.tds_unbind_guest_return);
                     XDGSDK.Logout();
+                    DataStorage.SaveString(DataStorage.PrivacyKey, "");
                     UIManager.DismissAll();
                 } else{
                     if (dataList.Count == 1){ //解绑最后一个绑定的第三方，和删除账号一个逻辑
@@ -181,6 +186,7 @@ namespace com.xd.intl.pc{
                         cellView.refreshState(cellMd);
                         UIManager.ShowToast(langModel.tds_unbind_delete_success_return_sign);
                         XDGSDK.Logout();
+                        DataStorage.SaveString(DataStorage.PrivacyKey, "");
                         UIManager.DismissAll();
                     } else{ //不是唯一账号
                         var cellMd = dataList[cellIndex];

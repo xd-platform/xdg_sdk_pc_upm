@@ -45,18 +45,22 @@ namespace com.xd.intl.pc{
 
         public static void InitSDK(string sdkClientId, Action<bool, string> callback){
             DataStorage.SaveString(DataStorage.ClientId, sdkClientId);
-            Net.GetRequest(INIT_SDK, null, (data) => {
-                var model = XDGSDK.GetModel<InitConfigModel>(data);
-                if (model.code == SUCCESS){
-                    InitConfigModel.SaveToLocal(model);
-                    InitBootstrap(model, callback, "");
-                } else{
-                    InitBootstrap(InitConfigModel.GetLocalModel(), callback, model.msg);
-                }
-            }, (code, msg) => {
-                InitBootstrap(InitConfigModel.GetLocalModel(), callback, msg);
-                XDGSDK.LogError($"初始化失败：code:{code} msg:{msg}");
-            });
+            if (XDGTool.hasNetwork()){
+                Net.GetRequest(INIT_SDK, null, (data) => {
+                    var model = XDGSDK.GetModel<InitConfigModel>(data);
+                    if (model.code == SUCCESS){
+                        InitConfigModel.SaveToLocal(model);
+                        InitBootstrap(model, callback, "");
+                    } else{
+                        InitBootstrap(InitConfigModel.GetLocalModel(), callback, model.msg);
+                    }
+                }, (code, msg) => {
+                    InitBootstrap(InitConfigModel.GetLocalModel(), callback, msg);
+                    XDGSDK.LogError($"初始化失败：code:{code} msg:{msg}");
+                });
+            } else{
+                InitBootstrap(InitConfigModel.GetLocalModel(), callback, "No Network Error");
+            }
         }
 
         private static void InitBootstrap(InitConfigModel infoMd, Action<bool, string> callback, string msg){
@@ -87,42 +91,36 @@ namespace com.xd.intl.pc{
                 var localUser = XDGUserModel.GetLocalModel();
                 if (localUser != null){
                     AsyncLocalTdsUser(localUser.data, SyncTokenModel.GetLocalToken(), callback, errorCallback);
+                    //异步请求一下用户信息
+                    RequestUserInfo(true, (u) => { }, (e) => { });
                 } else{
                     errorCallback(XDGError.msg(lmd.tds_login_failed));
                 }
             } else{
                 GetLoginParam(loginType, (param) => {
                     UIManager.ShowLoading();
-                    Net.PostRequest(XDG_COMMON_LOGIN, param, (data) => {
+                    RequestKidToken(param, (accessModel) => {
                         UIManager.DismissLoading();
                         Thread.Sleep(TimeSpan.FromSeconds(0.2f));
-                        var model = XDGSDK.GetModel<TokenModel>(data);
-                        if (model.code == SUCCESS){
-                            TokenModel.SaveToLocal(model);
-                            RequestUserInfo((userMd) => {
-                                AsyncNetworkTdsUser(userMd.userId, (sessionToken) => {
-                                    CheckPrivacyAlert(isPass => {
-                                        if (isPass){
-                                            callback(userMd);
-                                        }
-                                    });
-                                }, errorCallback);
-                            }, (error) => {
-                                errorCallback(XDGError.msg(error.error_msg));
-                            });
-                        } else{
-                            errorCallback(XDGError.msg(model.msg));
-                        }
-                    }, (code, msg) => {
-                        XDGSDK.LogError("登录失败 code: " + code + " msg: " + msg);
+                        
+                        RequestUserInfo(false, (userMd) => {
+                            AsyncNetworkTdsUser(userMd.data.userId, (sessionToken) => {
+                                CheckPrivacyAlert(() => {
+                                    XDGUserModel.SaveToLocal(userMd); //同意协议后再保存  
+                                    callback(userMd.data);
+                                });
+                            }, errorCallback);
+                        }, (error) => { errorCallback(XDGError.msg(error.error_msg)); });
+                    }, (tkError) => {
                         UIManager.DismissLoading();
-                        errorCallback(XDGError.msg(msg));
+                        errorCallback(tkError);
                     });
                 }, errorCallback);
             }
         }
 
-        public static void GetLoginParam(LoginType loginType, Action<Dictionary<string, object>> callback, Action<XDGError> errorCallback){
+        public static void GetLoginParam(LoginType loginType, Action<Dictionary<string, object>> callback,
+            Action<XDGError> errorCallback){
             if (loginType == LoginType.Guest){
                 Dictionary<string, object> param = new Dictionary<string, object>{
                     {"type", (int) loginType},
@@ -159,11 +157,13 @@ namespace com.xd.intl.pc{
                         XDGSDK.LogError($"Tap 登录失败: code: {tapError.code},  message: {msg}");
                     }
                 }
+
                 errorCallback(XDGError.msg(msg));
             }
         }
 
-        private static async void AsyncLocalTdsUser(XDGUser xdgUser, string sessionToken, Action<XDGUser> callback, Action<XDGError> errorCallback){
+        private static async void AsyncLocalTdsUser(XDGUser xdgUser, string sessionToken, Action<XDGUser> callback,
+            Action<XDGError> errorCallback){
             if (!string.IsNullOrEmpty(sessionToken)){
                 LCUser user = LCObject.CreateWithoutData(LCUser.CLASS_NAME, xdgUser.userId) as LCUser;
                 user.SessionToken = sessionToken;
@@ -175,22 +175,35 @@ namespace com.xd.intl.pc{
             }
         }
 
-        private static void AsyncNetworkTdsUser(string userId, Action<string> callback, Action<XDGError> errorCallback){
-            Net.PostRequest(XDG_LOGIN_SYN, null, async (data) => {
-                var md = XDGSDK.GetModel<SyncTokenModel>(data);
-                if (md.code == SUCCESS){
-                    XDGSDK.Log("sync token: " + md.data.sessionToken);
-                    SyncTokenModel.SaveToLocal(md.data.sessionToken);
+        private static async void AsyncNetworkTdsUser(string userId, Action<string> callback, Action<XDGError> errorCallback){
+            if (XDGTool.hasNetwork()){
+                Net.PostRequest(XDG_LOGIN_SYN, null, async (data) => {
+                    var md = XDGSDK.GetModel<SyncTokenModel>(data);
+                    if (md.code == SUCCESS){
+                        XDGSDK.Log("sync token: " + md.data.sessionToken);
+                        SyncTokenModel.SaveToLocal(md.data.sessionToken);
 
-                    LCUser lcUser = LCObject.CreateWithoutData(LCUser.CLASS_NAME, userId) as LCUser;
-                    lcUser.SessionToken = md.data.sessionToken;
-                    await lcUser.SaveToLocal();
+                        LCUser lcUser = LCObject.CreateWithoutData(LCUser.CLASS_NAME, userId) as LCUser;
+                        lcUser.SessionToken = md.data.sessionToken;
+                        await lcUser.SaveToLocal();
 
-                    callback(md.data.sessionToken);
-                } else{
-                    errorCallback(XDGError.msg(md.msg));
-                }
-            }, async (code, msg) => {
+                        callback(md.data.sessionToken);
+                    } else{
+                        errorCallback(XDGError.msg(md.msg));
+                    }
+                }, async (code, msg) => {
+                    var token = SyncTokenModel.GetLocalToken();
+                    if (!string.IsNullOrEmpty(token)){
+                        LCUser lcUser = LCObject.CreateWithoutData(LCUser.CLASS_NAME, userId) as LCUser;
+                        lcUser.SessionToken = token;
+                        await lcUser.SaveToLocal();
+                        callback(token);
+                    } else{
+                        errorCallback(new XDGError(code, msg));
+                        XDGSDK.LogError("内建账号失败 code: " + code + " msg: " + msg);
+                    }
+                });   
+            } else{
                 var token = SyncTokenModel.GetLocalToken();
                 if (!string.IsNullOrEmpty(token)){
                     LCUser lcUser = LCObject.CreateWithoutData(LCUser.CLASS_NAME, userId) as LCUser;
@@ -198,29 +211,55 @@ namespace com.xd.intl.pc{
                     await lcUser.SaveToLocal();
                     callback(token);
                 } else{
-                    errorCallback(new XDGError(code, msg));
-                    XDGSDK.LogError("内建账号失败 code: " + code + " msg: " + msg);
+                    errorCallback(XDGError.msg("No Network Error"));
                 }
-            });
+            }
         }
 
-        public static void RequestUserInfo(Action<XDGUser> callback, Action<XDGError> errorCallback){
-            Net.GetRequest(XDG_USER_PROFILE, null, (data) => {
-                var model = XDGSDK.GetModel<XDGUserModel>(data);
-                if (model.code == SUCCESS){
-                    XDGUserModel.SaveToLocal(model);
-                    callback(model.data);
+        public static void RequestUserInfo(bool saveToLocal, Action<XDGUserModel> callback,
+            Action<XDGError> errorCallback){
+            if (XDGTool.hasNetwork()){
+                Net.GetRequest(XDG_USER_PROFILE, null, (data) => {
+                    var model = XDGSDK.GetModel<XDGUserModel>(data);
+                    if (model.code == SUCCESS){
+                        if (saveToLocal){
+                            XDGUserModel.SaveToLocal(model);
+                        }
+
+                        callback(model);
+                    } else{
+                        errorCallback(XDGError.msg(model.msg));
+                    }
+                }, (code, msg) => {
+                    var localUser = XDGUserModel.GetLocalModel();
+                    if (localUser != null){
+                        callback(localUser);
+                    } else{
+                        XDGSDK.LogError("获取用户信息失败 code: " + code + " msg: " + msg);
+                        errorCallback(new XDGError(code, msg));
+                    }
+                });
+            } else{
+                var localUser = XDGUserModel.GetLocalModel();
+                if (localUser != null){
+                    callback(localUser);
                 } else{
-                    errorCallback(XDGError.msg(model.msg));
+                    errorCallback(XDGError.msg("No Network Error"));
                 }
-            }, (code, msg) => {
-                XDGSDK.LogError("获取用户信息失败 code: " + code + " msg: " + msg);
-                errorCallback(new XDGError(code, msg));
-            });
+            }
         }
 
         public static void GetIpInfo(Action<IpInfoModel> callback, Action<XDGError> errorCallback){
-            RequestIpInfo(true, callback, errorCallback);
+            if (XDGTool.hasNetwork()){
+                RequestIpInfo(true, callback, errorCallback);
+            } else{
+                var oldMd = IpInfoModel.GetLocalModel();
+                if (oldMd != null){
+                    callback(oldMd);
+                } else{
+                    errorCallback(XDGError.msg("No Network Error"));
+                }
+            }
         }
 
         public static void RequestIpInfo(bool repeat, Action<IpInfoModel> callback, Action<XDGError> errorCallback){
@@ -243,15 +282,44 @@ namespace com.xd.intl.pc{
             });
         }
 
-        private static void CheckPrivacyAlert(Action<bool> callback){
-            if (InitConfigModel.CanShowPrivacyAlert()){
-                UIManager.ShowUI<PrivacyAlert>(null, (code, objc) => {
-                    if (code == UIManager.RESULT_SUCCESS){
-                        callback(true);
+        private static void RequestKidToken(Dictionary<string, object> param,
+            Action<TokenModel> callback, Action<XDGError> errorCallback){
+            if (XDGTool.hasNetwork()){
+                Net.PostRequest(XDG_COMMON_LOGIN, param, (tkData) => {
+                    var accessModel = XDGSDK.GetModel<TokenModel>(tkData);
+                    if (accessModel.code == SUCCESS){
+                        TokenModel.SaveToLocal(accessModel);
+                        callback(accessModel);
+                    } else{
+                        errorCallback(XDGError.msg(accessModel.msg));
+                    }
+                }, (code, msg) => {
+                    var localMd = TokenModel.GetLocalModel();
+                    if (localMd != null){
+                        callback(localMd);
+                    } else{
+                        errorCallback(new XDGError(code, msg));
                     }
                 });
             } else{
-                callback(true);
+                var localMd = TokenModel.GetLocalModel();
+                if (localMd != null){
+                    callback(localMd);
+                } else{
+                    errorCallback(XDGError.msg("No Network Error"));
+                }
+            }
+        }
+
+        private static void CheckPrivacyAlert(Action callback){
+            if (InitConfigModel.CanShowPrivacyAlert()){
+                UIManager.ShowUI<PrivacyAlert>(null, (code, objc) => {
+                    if (code == UIManager.RESULT_SUCCESS){
+                        callback();
+                    }
+                });
+            } else{
+                callback();
             }
         }
 

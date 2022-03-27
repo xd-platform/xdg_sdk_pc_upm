@@ -35,7 +35,10 @@ namespace com.xd.intl.pc{
                 errorCallback(XDGError.msg("Please init first"));
                 return;
             }
-            Api.LoginTyType(loginType, callback, errorCallback);
+            Api.LoginTyType(loginType, callback, (e) => {
+                LogError($"LoginTyType 登录失败 code:{e.code} msg:{e.error_msg}");
+                errorCallback(e);
+            });
         }
 
         public static void GetUserInfo(Action<XDGUser> callback, Action<XDGError> errorCallback){
@@ -49,7 +52,9 @@ namespace com.xd.intl.pc{
                 return;
             }
 
-            Api.RequestUserInfo(callback, errorCallback);
+            Api.RequestUserInfo(true, (md) => {
+                callback(md.data);
+            }, errorCallback);
         }
 
         public static bool IsPushServiceEnable(){
