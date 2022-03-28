@@ -85,7 +85,7 @@ namespace com.xd.intl.pc{
             XDGSDK.Tmp_IsInitSDK_ing = false;
         }
 
-        public static void LoginTyType(LoginType loginType, Action<XDGUser> callback, Action<XDGError> errorCallback){
+        public static void LoginByType(LoginType loginType, Action<XDGUser> callback, Action<XDGError> errorCallback){
             var lmd = LanguageMg.GetCurrentModel();
             if (loginType == LoginType.Default){
                 var localUser = XDGUserModel.GetLocalModel();

@@ -12,11 +12,11 @@ namespace com.xd.intl.pc{
 
         public static void SaveToLocal(IpInfoModel model){
             if (model != null){
-                //测试用的
-                var region = DataStorage.LoadString("test_region");
-                if (!string.IsNullOrEmpty(region)){
-                    model.country_code = region;
-                }
+                //测试用的代码
+                // var region = DataStorage.LoadString("test_region");
+                // if (!string.IsNullOrEmpty(region)){
+                //     model.country_code = region;
+                // }
                 
                 string json = XDGSDK.GetJson(model);
                 DataStorage.SaveString(DataStorage.IpInfo, json);

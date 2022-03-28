@@ -62,7 +62,7 @@
 #### 登录
 ```
 1.初始化成功后才可以调用登录
-XDGSDK.LoginTyType(LoginType.TapTap, (user)=>{
+XDGSDK.LoginByType(LoginType.TapTap, (user)=>{
             ResultText.text = $"Tap登录成功：{user.nickName} userId: {user.userId} kid: {user.token.kid}";
         },(error) => {
             ResultText.text = $"登录失败：code: {error.code}  msg: {error.error_msg}";
@@ -161,3 +161,5 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\open-taptap-{Tap的ClientId}\Shell\Open\Command]
 @="\"C:\\Users\\XD\\Desktop\\APP\\win_app\\app\\XDGSDK-PC-6.0.exe\" \"%1\""  //改成自己的exe安装路径
 ```
+
+[CHANGE LOG](https://github.com/xd-platform/xdg_sdk_pc_upm/blob/pc_upm/CHANGELOG.md)

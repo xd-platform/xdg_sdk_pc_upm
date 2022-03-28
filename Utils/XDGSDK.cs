@@ -29,14 +29,14 @@ namespace com.xd.intl.pc{
             });
         }
 
-        public static void LoginTyType(LoginType loginType, Action<XDGUser> callback, Action<XDGError> errorCallback){
+        public static void LoginByType(LoginType loginType, Action<XDGUser> callback, Action<XDGError> errorCallback){
             if (!IsInitialized()){
                 errorCallback(XDGError.msg("Please init first"));
                 return;
             }
 
-            Api.LoginTyType(loginType, callback, (e) => {
-                LogError($"LoginTyType 登录失败 code:{e.code} msg:{e.error_msg}");
+            Api.LoginByType(loginType, callback, (e) => {
+                LogError($"LoginByType 登录失败 code:{e.code} msg:{e.error_msg}");
                 errorCallback(e);
             });
         }
