@@ -9,8 +9,8 @@ using UnityEngine;
 
 namespace com.xd.intl.pc{
     public class Api{
-        private readonly static string BASE_URL = "https://test-xdsdk-intnl-6.xd.com"; //测试
-        // private readonly static string BASE_URL = "https://xdsdk-intnl-6.xd.com"; //正式
+        // private readonly static string BASE_URL = "https://test-xdsdk-intnl-6.xd.com"; //测试
+        private readonly static string BASE_URL = "https://xdsdk-intnl-6.xd.com"; //正式
 
         //获取配置
         private readonly static string INIT_SDK = BASE_URL + "/api/init/v1/config";

@@ -324,8 +324,10 @@ namespace com.xd.intl.pc{
                 {"serverId", serverId},
                 {"roleId", roleId},
                 {"region", cfgMd.data.configs.region},
+                {"appId", appId},
+                {"lang", lang},
             };
-            return url + "?" + DictToQueryString2(param) + "&" + DictToQueryString2(GetCommonParam(""));
+            return url + "?" + DictToQueryString2(param);
         }
 
         private static string GetPlatform(){

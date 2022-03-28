@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TapTap.Login;
 using UnityEngine;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using TapTap.Bootstrap;
 
 namespace com.xd.intl.pc{
@@ -22,9 +23,7 @@ namespace com.xd.intl.pc{
             }
 
             Tmp_IsInitSDK_ing = true;
-            Api.GetIpInfo((model) => {
-                Api.InitSDK(sdkClientId, callback);
-            },(error)=>{
+            Api.GetIpInfo((model) => { Api.InitSDK(sdkClientId, callback); }, (error) => {
                 callback(false, error.error_msg);
                 Tmp_IsInitSDK_ing = false;
             });
@@ -35,6 +34,7 @@ namespace com.xd.intl.pc{
                 errorCallback(XDGError.msg("Please init first"));
                 return;
             }
+
             Api.LoginTyType(loginType, callback, (e) => {
                 LogError($"LoginTyType 登录失败 code:{e.code} msg:{e.error_msg}");
                 errorCallback(e);
@@ -52,9 +52,7 @@ namespace com.xd.intl.pc{
                 return;
             }
 
-            Api.RequestUserInfo(true, (md) => {
-                callback(md.data);
-            }, errorCallback);
+            Api.RequestUserInfo(true, (md) => { callback(md.data); }, errorCallback);
         }
 
         public static bool IsPushServiceEnable(){
@@ -68,7 +66,7 @@ namespace com.xd.intl.pc{
         public static async void Logout(){
             await TDSUser.Logout();
             TapLogin.Logout();
-            XDGUserModel.ClearUserData(); 
+            XDGUserModel.ClearUserData();
         }
 
         public static string GetSdkVersion(){
@@ -90,6 +88,7 @@ namespace com.xd.intl.pc{
                 XDGSDK.Log("请先登录");
                 return;
             }
+
             UIManager.ShowUI<UserCenterAlert>(null, null);
         }
 
@@ -103,39 +102,39 @@ namespace com.xd.intl.pc{
 
         public static void CheckPay(Action<CheckPayType> callback, Action<XDGError> errorCallback){
             Api.checkPay((model) => {
-                    if (model.data.list != null && model.data.list.Count > 0){
-                        var hasIOS = false;
-                        var hasAndroid = false;
-                        foreach (var md in model.data.list){
-                            if (md.platform == 1){
-                                hasIOS = true;
-                            }
-
-                            if (md.platform == 2){
-                                hasAndroid = true;
-                            }
+                if (model.data.list != null && model.data.list.Count > 0){
+                    var hasIOS = false;
+                    var hasAndroid = false;
+                    foreach (var md in model.data.list){
+                        if (md.platform == 1){
+                            hasIOS = true;
                         }
 
-                        if (hasIOS || hasAndroid){
-                            var param = new Dictionary<string, object>(){
-                                {"hasIOS", hasIOS},
-                                {"hasAndroid", hasAndroid},
-                            };
-                            UIManager.ShowUI<PayHintAlert>(param, null);
+                        if (md.platform == 2){
+                            hasAndroid = true;
                         }
+                    }
 
-                        if (hasIOS && hasAndroid){
-                            callback(CheckPayType.iOSAndAndroid);
-                        } else if (hasIOS){
-                            callback(CheckPayType.iOS);
-                        } else if (hasAndroid){
-                            callback(CheckPayType.Android);
-                        } else{
-                            callback(CheckPayType.None);
-                        }
+                    if (hasIOS || hasAndroid){
+                        var param = new Dictionary<string, object>(){
+                            {"hasIOS", hasIOS},
+                            {"hasAndroid", hasAndroid},
+                        };
+                        UIManager.ShowUI<PayHintAlert>(param, null);
+                    }
+
+                    if (hasIOS && hasAndroid){
+                        callback(CheckPayType.iOSAndAndroid);
+                    } else if (hasIOS){
+                        callback(CheckPayType.iOS);
+                    } else if (hasAndroid){
+                        callback(CheckPayType.Android);
                     } else{
                         callback(CheckPayType.None);
                     }
+                } else{
+                    callback(CheckPayType.None);
+                }
             }, errorCallback);
         }
 
@@ -172,6 +171,11 @@ namespace com.xd.intl.pc{
             if (string.IsNullOrEmpty(json)){
                 return null;
             }
+
+            if (!IsJson(json)){
+                return null;
+            }
+            
             return JsonConvert.DeserializeObject<T>(json);
         }
 
@@ -181,6 +185,32 @@ namespace com.xd.intl.pc{
             }
 
             return JsonConvert.SerializeObject(model);
+        }
+
+        public static bool IsJson(string strInput){
+            if (string.IsNullOrWhiteSpace(strInput)){
+                return false;
+            }
+
+            strInput = strInput.Trim();
+            if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
+                (strInput.StartsWith("[") && strInput.EndsWith("]"))) //For array
+            {
+                try{
+                    var obj = JToken.Parse(strInput);
+                    return true;
+                } catch (JsonReaderException jex){
+                    //Exception in parsing json
+                    Console.WriteLine(jex.Message);
+                    return false;
+                } catch (Exception ex) //some other exception
+                {
+                    Console.WriteLine(ex.ToString());
+                    return false;
+                }
+            } else{
+                return false;
+            }
         }
     }
 }

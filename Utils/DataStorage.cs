@@ -9,13 +9,13 @@ using System.IO;
 namespace com.xd.intl.pc{
     public static class DataStorage{
 
-        public static readonly string InitConfig = "XD_InitConfigKey";
-        public static readonly string IpInfo = "XD_IpInfoKey";
-        public static readonly string TokenInfo = "XD_TokenInfoKey";
-        public static readonly string UserInfo = "XD_UserInfoKey";
-        public static readonly string ClientId = "XD_ClientIdKey";
-        public static readonly string PrivacyKey = "XD_PrivacyKey";
-        public static readonly string SessionTokenKey = "XD_SessionTokenKey";
+        public static readonly string InitConfig = "PCG_InitConfigKey";
+        public static readonly string IpInfo = "PCG_IpInfoKey";
+        public static readonly string TokenInfo = "PCG_TokenModelInfoKey";
+        public static readonly string UserInfo = "PCG_UserInfoKey";
+        public static readonly string ClientId = "PCG_ClientIdKey";
+        public static readonly string PrivacyKey = "PCG_PrivacyKey";
+        public static readonly string SessionTokenKey = "PCG_SessionTokenKey";
         
         private static Dictionary<string, string> dataCache;
         private static byte[] Keys ={0x12, 0x34, 0x56, 0x78, 0x90, 0xAB, 0xCD, 0xEF};
