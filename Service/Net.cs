@@ -249,7 +249,7 @@ namespace com.xd.intl.pc{
             Dictionary<string, string> param = new Dictionary<string, string>{
                 {"clientId", string.IsNullOrEmpty(clientId) ? "" : clientId},
                 {"appId", cfgMd == null ? "" : cfgMd.data.configs.appId + ""},
-                {"did", SystemInfo.deviceUniqueIdentifier},
+                {"did", XDGTool.GetDid()},
                 {"sdkLang", LanguageMg.GetLanguageKey()},
                 {"lang", LanguageMg.GetLanguageKey()},
                 {"loc", ipMd.country_code},

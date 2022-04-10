@@ -9,8 +9,8 @@ using UnityEngine;
 
 namespace com.xd.intl.pc{
     public class Api{
-        // private readonly static string BASE_URL = "https://test-xdsdk-intnl-6.xd.com"; //测试
-        private readonly static string BASE_URL = "https://xdsdk-intnl-6.xd.com"; //正式
+        // public readonly static string BASE_URL = "https://test-xdsdk-intnl-6.xd.com"; //测试
+        public readonly static string BASE_URL = "https://xdsdk-intnl-6.xd.com"; //正式
 
         //获取配置
         private readonly static string INIT_SDK = BASE_URL + "/api/init/v1/config";
@@ -45,7 +45,7 @@ namespace com.xd.intl.pc{
 
         public static void InitSDK(string sdkClientId, Action<bool, string> callback){
             DataStorage.SaveString(DataStorage.ClientId, sdkClientId);
-            if (XDGTool.hasNetwork()){
+            if (XDGTool.HasNetwork()){
                 Net.GetRequest(INIT_SDK, null, (data) => {
                     var model = XDGSDK.GetModel<InitConfigModel>(data);
                     if (model.code == SUCCESS){
@@ -124,7 +124,7 @@ namespace com.xd.intl.pc{
             if (loginType == LoginType.Guest){
                 Dictionary<string, object> param = new Dictionary<string, object>{
                     {"type", (int) loginType},
-                    {"token", SystemInfo.deviceUniqueIdentifier}
+                    {"token", XDGTool.GetDid()}
                 };
                 callback(param);
             } else if (loginType == LoginType.TapTap){
@@ -176,7 +176,7 @@ namespace com.xd.intl.pc{
         }
 
         private static async void AsyncNetworkTdsUser(string userId, Action<string> callback, Action<XDGError> errorCallback){
-            if (XDGTool.hasNetwork()){
+            if (XDGTool.HasNetwork()){
                 Net.PostRequest(XDG_LOGIN_SYN, null, async (data) => {
                     var md = XDGSDK.GetModel<SyncTokenModel>(data);
                     if (md.code == SUCCESS){
@@ -218,7 +218,7 @@ namespace com.xd.intl.pc{
 
         public static void RequestUserInfo(bool saveToLocal, Action<XDGUserModel> callback,
             Action<XDGError> errorCallback){
-            if (XDGTool.hasNetwork()){
+            if (XDGTool.HasNetwork()){
                 Net.GetRequest(XDG_USER_PROFILE, null, (data) => {
                     var model = XDGSDK.GetModel<XDGUserModel>(data);
                     if (model.code == SUCCESS){
@@ -250,7 +250,7 @@ namespace com.xd.intl.pc{
         }
 
         public static void GetIpInfo(Action<IpInfoModel> callback, Action<XDGError> errorCallback){
-            if (XDGTool.hasNetwork()){
+            if (XDGTool.HasNetwork()){
                 RequestIpInfo(true, callback, errorCallback);
             } else{
                 var oldMd = IpInfoModel.GetLocalModel();
@@ -284,7 +284,7 @@ namespace com.xd.intl.pc{
 
         private static void RequestKidToken(Dictionary<string, object> param,
             Action<TokenModel> callback, Action<XDGError> errorCallback){
-            if (XDGTool.hasNetwork()){
+            if (XDGTool.HasNetwork()){
                 Net.PostRequest(XDG_COMMON_LOGIN, param, (tkData) => {
                     var accessModel = XDGSDK.GetModel<TokenModel>(tkData);
                     if (accessModel.code == SUCCESS){
