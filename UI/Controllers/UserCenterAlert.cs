@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TapTap.Login;
 using UnityEngine;
 using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
@@ -211,6 +212,10 @@ namespace com.xd.intl.pc{
                         cellMd.status = (int) BindType.UnBind;
                         cellView.refreshState(cellMd);
                         UIManager.ShowToast(langModel.tds_unbind_success);
+                    }
+
+                    if (loginType == LoginType.TapTap){
+                        TapLogin.Logout();
                     }
 
                     if (unBindCallback != null){
