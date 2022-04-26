@@ -40,11 +40,39 @@ namespace com.xd.intl.pc{
                     bindBt.transform.Find("Text").GetComponent<Text>().color = Color.black;
                     arrowImage.sprite = Resources.Load("Images/arrow_black", typeof(Sprite)) as Sprite;
                 }
+
+                processShowOrNot();
             }
         }
 
         public void bindButtonTap(){
             OnCallback(cellIndex, "code 是cell index");
+        }
+
+        private void processShowOrNot(){ //处理绑定按钮显示或隐藏
+            if (cellModel != null){
+                var md = InitConfigModel.GetLocalModel();
+                foreach (var netMd in md.data.configs.bindEntriesConfig){
+                    if (cellModel.loginName.ToLower() == netMd.entryName.ToLower()){
+                        if (cellModel.status == (int) BindType.Bind){
+                            showBindBt(netMd.canUnbind); //可以显示解绑按钮
+                        } else{
+                            showBindBt(netMd.canBind);  //可以显示绑定按钮
+                        }
+                        break;
+                    }
+                }   
+            }
+        }
+
+        private void showBindBt(int show){
+            if (show == 1){
+                bindBt.gameObject.SetActive(true);
+                arrowImage.gameObject.SetActive(true);
+            } else{
+                bindBt.gameObject.SetActive(false);
+                arrowImage.gameObject.SetActive(false);
+            }
         }
     }
 }

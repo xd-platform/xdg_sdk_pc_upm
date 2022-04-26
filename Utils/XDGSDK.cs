@@ -157,6 +157,16 @@ namespace com.xd.intl.pc{
             }
         }
 
+        public static void RegisterBindCallback(Action<LoginType> callback, Action<XDGError> errorCallback){
+            UserCenterAlert.bindCallback = callback;
+            UserCenterAlert.bindErrorCallback = errorCallback;
+        }
+        
+        public static void RegisterUnBindCallback(Action<LoginType> callback, Action<XDGError> errorCallback){
+            UserCenterAlert.unBindCallback = callback;
+            UserCenterAlert.unBindErrorCallback = errorCallback;
+        }
+
         public static void Log(string msg){
             Debug.Log($"-------------PCGSDK Log-------------\n {msg} \n\n");
         }

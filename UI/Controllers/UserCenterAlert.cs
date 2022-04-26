@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Image = UnityEngine.UI.Image;
@@ -21,7 +22,13 @@ namespace com.xd.intl.pc{
 
         private List<BindModel.Data> dataList;
         private List<AccountCell> cellList;
-
+        
+        //绑定解绑回调
+        public static Action<LoginType> bindCallback;
+        public static Action<XDGError> bindErrorCallback;
+        public static Action<LoginType> unBindCallback;
+        public static Action<XDGError> unBindErrorCallback;
+        
         void Start(){
             userMd = XDGUserModel.GetLocalModel();
             langModel = LanguageMg.GetCurrentModel();
@@ -122,20 +129,20 @@ namespace com.xd.intl.pc{
                 cellList.Add(cell);
             }
 
-            if (userMd.data.loginType == (int) LoginType.Guest){ //游客添加删除
-                GameObject gameObj = Instantiate(Resources.Load("Prefabs/DeleteCell")) as GameObject;
-                gameObj.name = "DeleteCell";
-                gameObj.transform.SetParent(Content.transform);
-                gameObj.transform.localPosition =
-                    new Vector3(350, -cellHeight / 2 - (cellHeight * cellList.Count) - 10, 0);
-                gameObj.transform.localScale = Vector3.one;
-
-                DeleteCell cell = gameObj.GetComponent<DeleteCell>();
-                cell.setDeleteText(langModel.tds_delete_account);
-                cell.Callback += (code, msg) => { //delete 事件回调
-                    unbind(LoginType.Guest, -1);
-                };
-            }
+            // if (userMd.data.loginType == (int) LoginType.Guest){ //游客添加删除
+            //     GameObject gameObj = Instantiate(Resources.Load("Prefabs/DeleteCell")) as GameObject;
+            //     gameObj.name = "DeleteCell";
+            //     gameObj.transform.SetParent(Content.transform);
+            //     gameObj.transform.localPosition =
+            //         new Vector3(350, -cellHeight / 2 - (cellHeight * cellList.Count) - 10, 0);
+            //     gameObj.transform.localScale = Vector3.one;
+            //
+            //     DeleteCell cell = gameObj.GetComponent<DeleteCell>();
+            //     cell.setDeleteText(langModel.tds_delete_account);
+            //     cell.Callback += (code, msg) => { //delete 事件回调
+            //         unbind(LoginType.Guest, -1);
+            //     };
+            // }
         }
 
 
@@ -149,6 +156,12 @@ namespace com.xd.intl.pc{
                         cellMd.status = (int) BindType.Bind;
                         cellView.refreshState(cellMd);
                         UIManager.ShowToast(langModel.tds_bind_success);
+                        
+                        //给游戏回调
+                        if (bindCallback != null){
+                            bindCallback(loginType);
+                        }
+                        
                     }, (error) => {
                        showBindError(error);
                     });
@@ -167,6 +180,10 @@ namespace com.xd.intl.pc{
                 } else{
                     UIManager.ShowToast(error.error_msg);
                 }   
+            }
+
+            if (bindErrorCallback != null){
+                bindErrorCallback(error);
             }
         }
 
@@ -195,12 +212,20 @@ namespace com.xd.intl.pc{
                         cellView.refreshState(cellMd);
                         UIManager.ShowToast(langModel.tds_unbind_success);
                     }
+
+                    if (unBindCallback != null){
+                        unBindCallback(loginType);
+                    }
                 }
             }, (error) => {
                 if (string.IsNullOrEmpty(error.error_msg)){
                     UIManager.ShowToast(langModel.tds_unbind_error);
                 } else{
                     UIManager.ShowToast(error.error_msg);
+                }
+
+                if (unBindErrorCallback != null){
+                    unBindErrorCallback(error);
                 }
             });
         }

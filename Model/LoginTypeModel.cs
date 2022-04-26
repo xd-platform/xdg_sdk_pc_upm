@@ -7,12 +7,17 @@ namespace com.xd.intl.pc{
        public LoginTypeModel(LoginType type){ 
             this.type = type;
             this.typeValue = (int)type;
+            this.typeName = GetName((int)type);
+       }
 
-            if (type == LoginType.TapTap){
-                this.typeName = "TapTap";
-            }else if (type == LoginType.Guest){
-                this.typeName = "Guest";
-            }
-        }
+       public static string GetName(int type){
+           if (type == (int)LoginType.TapTap){
+              return "TapTap";
+           }else if (type == (int)LoginType.Guest){
+              return "Guest";
+           }
+           return "";
+       }
+
     }
 }
