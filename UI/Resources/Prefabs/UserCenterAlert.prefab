@@ -382,6 +382,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba818b598244e4198b3413b64261d6e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bindTitleTxt: {fileID: 1544401199258916793}
   titleTxt: {fileID: 4665321086303749140}
   infoTitleTxt: {fileID: 2527360427458776423}
   typeTxt: {fileID: 3686669451360775763}
@@ -1085,7 +1086,7 @@ GameObject:
   - component: {fileID: 7183120660038841350}
   - component: {fileID: 1544401199258916793}
   m_Layer: 5
-  m_Name: Text
+  m_Name: bindTitleText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

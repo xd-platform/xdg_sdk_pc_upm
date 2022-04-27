@@ -7,6 +7,7 @@ using Image = UnityEngine.UI.Image;
 
 namespace com.xd.intl.pc{
     public class UserCenterAlert : UIElement{
+        public Text bindTitleTxt;
         public Text titleTxt;
         public Text infoTitleTxt;
         public Text typeTxt;
@@ -34,6 +35,7 @@ namespace com.xd.intl.pc{
             userMd = XDGUserModel.GetLocalModel();
             langModel = LanguageMg.GetCurrentModel();
             titleTxt.text = langModel.tds_account_safe_info;
+            bindTitleTxt.text = "       " + langModel.tds_account_bind_info;
 
             infoTitleTxt.text = langModel.tds_account_info;
             typeTxt.text = $"{langModel.tds_current_account_prefix} ({GetLoginTypeName()})";
