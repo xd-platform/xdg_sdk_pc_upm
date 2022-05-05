@@ -5,6 +5,7 @@ using LeanCloud.Storage;
 using TapTap.Bootstrap;
 using TapTap.Common;
 using TapTap.Login;
+using TapTap.TapDB.PC;
 using UnityEngine;
 
 namespace com.xd.intl.pc{
@@ -75,7 +76,11 @@ namespace com.xd.intl.pc{
                     .TapDBConfig(tapCfg.enableTapDB, tapCfg.tapDBChannel, Application.version)
                     .ConfigBuilder();
                 TapBootstrap.Init(config);
-
+                
+                //单独初始化 tap db pc
+                //TapDBPC.EnableLog(true);
+                TapDBPC.InitWithClientId(tapCfg.clientId, tapCfg.tapDBChannel, Application.version);
+                
                 callback(true, msg);
                 XDGSDK.Tmp_IsInited = true;
             } else{
