@@ -7,8 +7,7 @@
     "com.taptap.tds.bootstrap": "https://github.com/TapTap/TapBootstrap-Unity.git#3.6.3",
     "com.taptap.tds.common": "https://github.com/TapTap/TapCommon-Unity.git#3.6.3",
     "com.taptap.tds.login": "https://github.com/taptap/TapLogin-Unity.git#3.6.3",
-    "com.taptap.tds.tapdb": "https://github.com/TapTap/TapDB-Unity.git#3.6.3",
-    "com.xd.intl.pc": "https://github.com/xd-platform/xdg_sdk_pc_upm.git#6.1.1",
+    "com.xd.intl.pc": "https://github.com/xd-platform/xdg_sdk_pc_upm.git#6.1.2",
     "com.unity.nuget.newtonsoft-json": "2.0.2",
     "com.unity.textmeshpro": "3.0.6",
 ```
